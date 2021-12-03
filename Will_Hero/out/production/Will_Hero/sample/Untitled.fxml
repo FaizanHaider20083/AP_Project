@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<TitledPane animated="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" text="Will Hero Online" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+  <content>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+         <children>
+            <ImageView fitHeight="373.0" fitWidth="793.0" smooth="false">
+               <image>
+                  <Image url="@../assets/mainscreen.gif" />
+               </image>
+            </ImageView>
+         </children></AnchorPane>
+  </content>
+   <font>
+      <Font name="Arial Black" size="13.0" />
+   </font>
+</TitledPane>
