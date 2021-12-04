@@ -39,4 +39,18 @@ public class Controller {
             f.printStackTrace();
         }
     }
+    @FXML
+    void backtomenu(ActionEvent e) throws IOException{
+        try {
+            System.out.println("Load");
+            Parent root = FXMLLoader.load(getClass().getResource("Untitled.fxml"));
+            stage = (Stage)((Node)e.getSource()).getScene().getWindow();
+            scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        }
+        catch (Exception f){
+            f.printStackTrace();
+        }
+    }
 }
