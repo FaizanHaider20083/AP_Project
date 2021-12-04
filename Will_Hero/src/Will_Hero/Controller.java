@@ -1,4 +1,4 @@
-package sample;
+package Will_Hero;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
