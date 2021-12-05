@@ -13,4 +13,7 @@ public class Player{
         this.hero = new Hero(0,0);
         this.gameList = new ArrayList<Integer>();
     }
+    Hero getHero(){
+        return this.hero;
+    }
 }

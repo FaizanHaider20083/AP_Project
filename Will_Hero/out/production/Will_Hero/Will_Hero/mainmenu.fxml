@@ -6,22 +6,22 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="359.0" prefWidth="793.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="359.0" prefWidth="793.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Will_Hero.Controller">
     <children>
         <ImageView fitHeight="373.0" fitWidth="793.0" layoutY="-14.0" pickOnBounds="true" preserveRatio="true">
             <image>
                 <Image url="@../assets/mainscreen.gif" />
             </image>
         </ImageView>
-        <Button layoutX="358.0" layoutY="155.0" mnemonicParsing="false" onAction="#play" prefHeight="66.0" prefWidth="74.0" text="Play">
+        <Button layoutX="358.0" layoutY="155.0" mnemonicParsing="false" onAction="#play" opacity="0.0" prefHeight="66.0" prefWidth="74.0" text="Play">
             <font>
                 <Font name="Arial Black" size="13.0" />
             </font></Button>
-        <Button layoutX="451.0" layoutY="263.0" mnemonicParsing="false" onAction="#load" text="Load">
+        <Button layoutX="451.0" layoutY="263.0" mnemonicParsing="false" onAction="#load" opacity="0.0" prefWidth="52.0" text="Load">
             <font>
                 <Font name="Arial Black" size="13.0" />
             </font></Button>
-        <Button layoutX="290.0" layoutY="263.0" mnemonicParsing="false" onAction="#quit" text="Quit">
+        <Button layoutX="290.0" layoutY="263.0" minHeight="-Infinity" mnemonicParsing="false" onAction="#quit" opacity="0.0" prefHeight="41.0" prefWidth="47.0" text="Quit">
             <font>
                 <Font name="Arial Black" size="13.0" />
             </font>

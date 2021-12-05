@@ -39,4 +39,19 @@ public class Hero extends GameObjects{
         this.helmet = new Helmet();
         this.boss_status = false;
     }
+    void move(){
+        System.out.println("Running");
+        for (int i =0;i<10;i++){
+            float pos_y = getPos_y();
+            pos_y += 2*i;
+            setPos_y(pos_y);
+
+
+        }
+        for (int i = 0;i<10;i++){
+            float pos_y = getPos_y();
+            pos_y -= 2*i;
+            setPos_y(pos_y);
+        }
+    }
 }
