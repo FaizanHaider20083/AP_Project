@@ -1,8 +1,12 @@
 package Will_Hero;
+import javafx.animation.TranslateTransition;
+import javafx.geometry.Bounds;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.Duration;
 
 import java.util.Random;
 
@@ -40,6 +44,38 @@ class Green_Orcs extends Orcs{
         display(pane);
 
     }
+    // New code starts here _____________________________________________________________ (update)
+    boolean platfrom_collision(Node obj){
+        Bounds boundsInscreen = obj.localToParent(obj.getBoundsInLocal());
+        return boundsInscreen.intersects(this.getNode().getBoundsInParent());
+//        if(check_y(boundsInscreen) && (check_x(boundsInscreen))){
+
+//            System.out.println("gladiator true " + this.getGladiator().getY() + " " + boundsInscreen.getMinY() + " " + boundsInscreen.getMaxY());
+
+//            return true;
+//        }
+//        System.out.println("Else started");
+//        System.out.println("gladiator Y " + this.getGladiator().getY());
+//        System.out.println("gladiator X " + this.getGladiator().getX());
+//        System.out.println(boundsInscreen.getMinY());System.out.println(boundsInscreen.getMaxY());
+//        System.out.println("Else finished");
+//        return false;
+    }
+
+    void free_fall(){
+//        while (this.getNode().getY() < 350){
+//            this.getNode().setY(this.getNode().getY() + 8);
+//        }
+//        works but just shows result not the transition animation
+
+        TranslateTransition tt = new TranslateTransition(Duration.millis(2000),this.getNode());
+        tt.setFromY(-20);
+        System.out.println(this.getNode().getY());
+        tt.setToY(350);
+        tt.play();
+       // this.getNode().setOpacity(0);
+    }
+
     private void setPath(){
         Random rand = new Random();
         this.path = "assets/orc" + Integer.toString(rand.nextInt(6) + 1) +".png";

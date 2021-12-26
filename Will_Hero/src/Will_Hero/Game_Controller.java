@@ -181,8 +181,43 @@ public class Game_Controller{
         }
         for (Green_Orcs orc:orc){
             Node temp = orc.getNode();
-            if (hero.collision(temp)) System.out.println("got orc");
+
+            //updated code here
+            // dikh jaana chahiye vaise toh but still adding multiple lines
+            // nice work though, it's fun working with you - been an absolute pleasure
+            double distance = temp.getBoundsInParent().getMinX() - hero.getGladiator().getX();
+            if (distance <= 80) {
+                System.out.println("Starting" + temp.getTranslateX());
+               TranslateTransition tt = new TranslateTransition(Duration.millis(50), temp);
+               tt.setFromX(temp.getTranslateX());
+               tt.setToX(temp.getTranslateX() - distance);
+               tt.play();
+
+               orc.setHealth(orc.getHealth() - 10);
+               tt.setOnFinished(e->{
+                   System.out.println("On finished" + temp.getTranslateX());
+                   temp.setTranslateX(temp.getTranslateX() + 60);
+                  TranslateTransition tt2 = new TranslateTransition(Duration.millis(200), temp);
+                   tt2.setFromX(temp.getTranslateX());
+                   tt2.setToX(temp.getTranslateX() + 60);
+                   tt2.play();
+                   boolean contact = false;
+                   for (Platform p : platform){
+                       if(orc.platfrom_collision(p.getNode())) contact = true;
+                   }
+                   if (!contact) {
+                       orc.free_fall();
+                       System.out.println("Free fall");
+
+                   }
+
+               });
+
+
+            }
+            else
             temp.setTranslateX(temp.getTranslateX() -80);
+            if (orc.getHealth() <= 0) temp.setOpacity(0);
 
         }
         if (boss_generate){
@@ -214,7 +249,7 @@ public class Game_Controller{
     void create_orcs(){
         for (int i =0;i<10;i++){
             int index = rand.nextInt(platform.size() );
-            while (platform.get(index).getWidth() < 80 && index != 0) index = rand.nextInt(platform.size());
+            while ( index == 0) index = rand.nextInt(platform.size());
             Green_Orcs temp  = new Green_Orcs(platform.get(index).getPos_x() + 40, platform.get(index).getPos_y() -40, 15, 0, 6, 40, 40, MainAnchorPane, 1);
             orc.add(temp);
         }
@@ -334,7 +369,7 @@ public class Game_Controller{
 
         Player player1 = new Player(130,130,0,8,30,40,MainAnchorPane,0);
         player = player1;
-        Lance lance = new Lance((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 20, MainAnchorPane,false);
+        Lance lance = new Lance((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 20, MainAnchorPane,true);
 
         Sword sword = new Sword((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY(),MainAnchorPane,true);
 
