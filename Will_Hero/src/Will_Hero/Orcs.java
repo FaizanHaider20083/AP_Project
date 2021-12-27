@@ -1,21 +1,20 @@
 package Will_Hero;
-import javafx.animation.TranslateTransition;
-import javafx.geometry.Bounds;
-import javafx.scene.Node;
 import javafx.scene.image.Image;
+import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.animation.TranslateTransition;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.util.Duration;
-
+import javafx.util.*;
+import javafx.geometry.Bounds;
 import java.util.Random;
 
 public abstract class Orcs extends GameObjects{
     private int health;
-    private float x_speed;
-    private float y_speed;
+    private int x_speed;
+    private int y_speed;
     abstract void display(AnchorPane pane);
-    Orcs(float x, float y, int health, float x_speed, float y_speed) {
+    Orcs(float x, float y, int health, int x_speed, int y_speed) {
         super(x, y);
         this.health = health;
         this.x_speed = x_speed;
@@ -23,10 +22,10 @@ public abstract class Orcs extends GameObjects{
     }
     public int getHealth() { return health; }
     public void setHealth(int health) { this.health = health; }
-    public float getX_speed() { return x_speed; }
-    public void setX_speed(float x_speed) { this.x_speed = x_speed; }
-    public float getY_speed() { return y_speed; }
-    public void setY_speed(float y_speed) { this.y_speed = y_speed;}
+    public int getX_speed() { return x_speed; }
+    public void setX_speed(int x_speed) { this.x_speed = x_speed; }
+    public int getY_speed() { return y_speed; }
+    public void setY_speed(int y_speed) { this.y_speed = y_speed;}
 }
 class Green_Orcs extends Orcs{
     private float width;
@@ -44,7 +43,6 @@ class Green_Orcs extends Orcs{
         display(pane);
 
     }
-    // New code starts here _____________________________________________________________ (update)
     boolean platfrom_collision(Node obj){
         Bounds boundsInscreen = obj.localToParent(obj.getBoundsInLocal());
         return boundsInscreen.intersects(this.getNode().getBoundsInParent());
@@ -75,7 +73,6 @@ class Green_Orcs extends Orcs{
         tt.play();
        // this.getNode().setOpacity(0);
     }
-
     private void setPath(){
         Random rand = new Random();
         this.path = "assets/orc" + Integer.toString(rand.nextInt(6) + 1) +".png";
@@ -112,7 +109,7 @@ class Green_Orcs extends Orcs{
         if(this.getY_speed()!=0){
             getNode().setY(getNode().getY()-this.getY_speed());
             if(getNode().getY()>=plat.getPos_y() - 40 || getNode().getY()<= plat.getPos_y() -100){
-                float y_speed2 = this.getY_speed();
+                int y_speed2 = this.getY_speed();
                 this.setY_speed(-y_speed2);
             }
         }
@@ -120,24 +117,58 @@ class Green_Orcs extends Orcs{
 }
 
 class Red_Orcs extends Orcs{
-    Red_Orcs(float x, float y, int health, int x_speed, int y_speed) {
+    private float width;
+    private float height;
+    private AnchorPane anchor;
+    private String path = "assets/redorc.png";
+    private int platform_info;
+    Red_Orcs(float x, float y, int health, int x_speed, int y_speed, float height, float width, AnchorPane pane, int platform_info) {
         super(x, y, health, x_speed, y_speed);
-    }
-    public void display(AnchorPane pane){
+        this.width = width;
+        this.height = height;
+        this.anchor = pane;
+        this.platform_info = platform_info;
+        display(pane);
 
+    }
+    public float getWidth() { return width; }
+    public float getHeight() { return height; }
+    public AnchorPane getAnchor() { return anchor; }
+    public String getPath() { return path; }
+    public int getPlatform_info() { return platform_info; }
+    public void display(AnchorPane pane){
+        System.out.println(getPath());
+        Image image = new Image(getPath());
+        ImageView node = getNode();
+        node = new ImageView(image);
+        node.setX(super.getPos_x());
+        node.setY(super.getPos_y());
+        node.setFitHeight(this.getHeight());
+        node.setFitWidth((this.getWidth()));
+        this.getAnchor().getChildren().add(node);
+        setNode(node);
+    }
+    public void motion(Platform plat){
+        if(this.getY_speed()!=0){
+            getNode().setY(getNode().getY()-this.getY_speed());
+            if(getNode().getY()>=plat.getPos_y() - 40 || getNode().getY()<= plat.getPos_y() -100){
+                int y_speed2 = this.getY_speed();
+                this.setY_speed(-y_speed2);
+            }
+        }
     }
 }
 
 class Boss extends Orcs{
     private boolean death_status;
-    private float width;
-    private float height;
+    private int width;
+    private int height;
     private AnchorPane anchor;
     private ImageView node;
     private String path = "assets/boss.png";
     private int platform_info;
-    public float getWidth() { return width; }
-    public float getHeight() { return height; }
+    public int getWidth() { return width; }
+    public int getHeight() { return height; }
     public AnchorPane getAnchor() { return anchor; }
     public String getPath() { return path; }
     public int getPlatform_info() { return platform_info; }

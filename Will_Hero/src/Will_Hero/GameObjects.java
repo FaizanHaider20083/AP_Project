@@ -4,9 +4,10 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 
+import java.io.Serializable;
 import java.util.Random;
 
-public abstract class GameObjects{
+public abstract class GameObjects implements Serializable{
     private float pos_x;
     private float pos_y;
     private ImageView node;
@@ -27,11 +28,17 @@ public abstract class GameObjects{
     abstract void display(AnchorPane pane);
 }
 class Platform extends GameObjects{
+    private Decorations decoration;
     private float y_speed;
     private float width;
     private float height;
+    private int objects;
+    void setObjects(int objects){this.objects = objects;}
+    int getObjects(){return this.objects;}
     private AnchorPane anchor;
 
+    void setDecoration(Decorations decoration){this.decoration = decoration;}
+    Decorations getDecoration(){return this.decoration;}
     private String path = "assets/T_Islands_01.png";
     private void setPath(){
         Random rand = new Random();
@@ -43,6 +50,7 @@ class Platform extends GameObjects{
         this.width = width;
         this.anchor = pane;
         this.y_speed = y_speed;
+        this.objects = 0;
         System.out.println("Created");
         display(pane);
     }

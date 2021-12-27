@@ -246,6 +246,7 @@ public class Hero extends GameObjects{
     private ImageView Gladiator;
     private String path = "assets/gladiator.png";
     private int platform_info;
+    void setHealth(int health){this.health = health;}
     Hero(float x, float y, float x_speed, float y_speed, float width, float height, AnchorPane pane, int platform_info) {
         super(x, y);
         this.x_speed = x_speed;
@@ -271,7 +272,7 @@ public class Hero extends GameObjects{
 
     public void motion(Platform plat,boolean platformContact){
 
-
+//          Y_speed initially is 8.
                 Gladiator.setY(Gladiator.getY() - this.getY_speed());
                 for (Weapon w: this.getHelmet().getWeaponlist()){
                     if (w.getActive_status()){
@@ -280,7 +281,7 @@ public class Hero extends GameObjects{
                     }
                 }
 
-                if ((Gladiator.getY() >= plat.getPos_y() - 40 || Gladiator.getY() <= plat.getPos_y() - 100) ) {
+                if ((Gladiator.getY() >= plat.getNode().getY() - 40 || Gladiator.getY() <= plat.getNode().getY() - 100) ) {
                     float y_speed2 = this.getY_speed();
 
                     if ((this.getY_speed() <0 && (platformContact))|| (this.getY_speed()>0 && (!platformContact))){
@@ -327,16 +328,30 @@ public class Hero extends GameObjects{
 //        System.out.println("Else finished");
 //        return false;
     }
+
+    void freefall(){
+//        while (this.getNode().getY() < 350){
+//            this.getNode().setY(this.getNode().getY() + 8);
+//        }
+//        works but just shows result not the transition animation
+
+        TranslateTransition tt = new TranslateTransition(Duration.millis(2000),this.getGladiator());
+        tt.setFromY(-20);
+        System.out.println(this.getGladiator().getY());
+        tt.setToY(350);
+        tt.play();
+        // this.getNode().setOpacity(0);
+    }
     boolean collision(Node obj){
         Bounds boundsInscreen = obj.localToParent(obj.getBoundsInLocal());//h-40 w-30
         //this.getPos_y() +this.getHeight()>= boundsInscreen.getMinY() && this.getPos_y() <= boundsInscreen.getMaxY()
-        if ((this.getPos_x() + this.getWidth() <= boundsInscreen.getMinX() && this.getPos_x()+ this.getWidth() +80>= boundsInscreen.getMinX() ) && ( (this.getPos_y() >= boundsInscreen.getMinY() && this.getPos_y()  <= boundsInscreen.getMaxY()) || (this.getPos_y() +this.getHeight() >= boundsInscreen.getMinY() && this.getPos_y() +this.getHeight() <= boundsInscreen.getMaxY()))){
-            System.out.println("Collision");
-
-            return  true;
-
-        }
-        else{
+//        if ((this.getPos_x() + this.getWidth() <= boundsInscreen.getMinX() && this.getPos_x()+ this.getWidth() +80>= boundsInscreen.getMinX() ) && ( (this.getPos_y() >= boundsInscreen.getMinY() && this.getPos_y()  <= boundsInscreen.getMaxY()) || (this.getPos_y() +this.getHeight() >= boundsInscreen.getMinY() && this.getPos_y() +this.getHeight() <= boundsInscreen.getMaxY()))){
+//            System.out.println("Collision");
+//
+//            return  true;
+//
+//        }
+//        else{
 
 //            System.out.println("Else");
 //            System.out.println(this.getPos_x());
@@ -346,6 +361,14 @@ public class Hero extends GameObjects{
 //            System.out.println(this.getPos_y());
 //            System.out.println(boundsInscreen.getMaxY() + " y " + boundsInscreen.getCenterY() + " " + boundsInscreen.getMinY());
 //            System.out.println("else finished");
+//            return false;
+//        }
+        if( boundsInscreen.intersects(this.getGladiator().getBoundsInParent())) return true;
+        else {
+            if (this.getGladiator().getX() <= boundsInscreen.getMinX() && this.getGladiator().getX() +80 >= boundsInscreen.getMinX())
+                if (this.getGladiator().getY() <= boundsInscreen.getMinY() && this.getGladiator().getY() +this.getHeight() >= boundsInscreen.getMinY())
+                    return true;
+
             return false;
         }
     }
@@ -361,4 +384,36 @@ public class Hero extends GameObjects{
     public float getX_speed() { return x_speed; }
     public float getY_speed() { return y_speed; }
     public void setY_speed(float y_speed) { this.y_speed = y_speed; }
+
+    public void jumping(ArrayList<Platform> platformList){
+        int contact = -1;
+        for (Platform p:platformList) {
+            Bounds platformBounds = p.getNode().getBoundsInParent();
+            if (this.getGladiator().getX() + this.getWidth() >= platformBounds.getMinX() && this.getGladiator().getX() <= platformBounds.getMaxX()) {
+                Gladiator.setY(Gladiator.getY() - this.getY_speed());
+                contact = 0;
+                System.out.println("true");
+                if (((this.getGladiator().getY() >= p.getNode().getY() - 40 && this.getGladiator().getY() <= p.getNode().getY() - 10 && this.getY_speed() <0)  || (this.getGladiator().getY() <= p.getNode().getY() - 100 && this.getGladiator().getY() <= p.getNode().getY() - 130 && this.getY_speed() >0))) {
+                    float y_speed2 = this.getY_speed();
+                    System.out.println("true ins");
+                    System.out.println(this.getGladiator().getY() + " " + p.getNode().getY() + " " );
+
+                    this.setY_speed(-y_speed2);
+
+                }
+                else System.out.println(this.getGladiator().getY() + " " + p.getNode().getY() + " else" );
+
+            }
+        }
+
+        if (contact == -1)
+
+        {    System.out.println("false");
+            if (this.getY_speed() < 0) //increase y and make it fall down
+            Gladiator.setY(Gladiator.getY() - this.getY_speed()/2);
+            else Gladiator.setY(Gladiator.getY() + this.getY_speed()/2);
+        }
+    }
+
+
 }

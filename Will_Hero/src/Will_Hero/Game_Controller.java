@@ -27,17 +27,20 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Game_Controller{
+public class Game_Controller implements Serializable{
     private Boss boss;
     private boolean boss_generate;
     private boolean platform_contact;
     private Random rand;
     private Hero hero;
     private Parent root;
+    private ArrayList <Decorations> decorationsList =new ArrayList<>();;
     private Player player;
     @FXML
     private AnchorPane MainAnchorPane;
     private boolean isMoving;
+    private ArrayList <Platform> small_platforms = new ArrayList<>();
+    private ArrayList <Platform> total_platforms = new ArrayList<>();
     private int score;
     private static Stage myStage;
     private static Scene gamePlayScene;
@@ -60,7 +63,7 @@ public class Game_Controller{
     private Text cointext;
     private ArrayList <WeaponChest> weaponList  = new ArrayList<>(); ;
     ArrayList <WeaponChest> getWeaponList(){return this.weaponList;}
-
+    ArrayList<GameObjects> gameobjectlist = new ArrayList<>();
     void death(){
 //        System.out.println(hero.getGladiator().getY());
         if (hero.getGladiator().getY() > 300)
@@ -109,15 +112,14 @@ public class Game_Controller{
 //        }
 
         for (Platform plat : platform){
-
             Node temp = plat.getNode();
             hero.collision(temp);
-
-
-
             temp.setTranslateX(temp.getTranslateX() -80);
-
-
+        }
+        for (Platform plat : small_platforms){
+            Node temp = plat.getNode();
+            hero.collision(temp);
+            temp.setTranslateX(temp.getTranslateX() -80);
         }
         for (Coins coin : coins){
             Node temp = coin.getNode();
@@ -125,13 +127,13 @@ public class Game_Controller{
                 player.setCurr_coins((player.getCurr_coins() + 10));
                 cointext.setText(Integer.toString(player.getCurr_coins()));
                 temp.setOpacity(0);
+                System.out.println("Coin collision");
             }
             temp.setTranslateX(temp.getTranslateX() -80);
         }
         for (CoinChest chest : coinChests){
             Node temp = chest.getNode();
             if(hero.collision(temp)){
-
                 String path = chest.getPath();
                 path = path.substring(0,path.length()-4) + "_open.png";
                 System.out.println(path);
@@ -139,13 +141,10 @@ public class Game_Controller{
                 player.setCurr_coins(player.getCurr_coins() + chest.getCoin_count());
             }
             temp.setTranslateX(temp.getTranslateX() -80);
-
-
         }
         for (WeaponChest chest : weaponList){
             Node temp = chest.getNode();
             if(hero.collision(temp)){
-
                 String path = chest.getPath();
                 path = path.substring(0,path.length()-4) + "_open.png";
                 System.out.println(chest.getWeapon());
@@ -179,9 +178,9 @@ public class Game_Controller{
 
 
         }
-        for (Green_Orcs orc:orc){
-            Node temp = orc.getNode();
-
+        ArrayList <Integer> removal = new ArrayList<>();
+        for (Green_Orcs orcc:orc){
+            Node temp = orcc.getNode();
             //updated code here
             // dikh jaana chahiye vaise toh but still adding multiple lines
             // nice work though, it's fun working with you - been an absolute pleasure
@@ -193,7 +192,7 @@ public class Game_Controller{
                tt.setToX(temp.getTranslateX() - distance);
                tt.play();
 
-               orc.setHealth(orc.getHealth() - 10);
+               orcc.setHealth(orcc.getHealth() - 10);
                tt.setOnFinished(e->{
                    System.out.println("On finished" + temp.getTranslateX());
                    temp.setTranslateX(temp.getTranslateX() + 60);
@@ -203,10 +202,11 @@ public class Game_Controller{
                    tt2.play();
                    boolean contact = false;
                    for (Platform p : platform){
-                       if(orc.platfrom_collision(p.getNode())) contact = true;
+                       if(orcc.platfrom_collision(p.getNode())) contact = true;
                    }
                    if (!contact) {
-                       orc.free_fall();
+                       orcc.free_fall();
+                       removal.add(orc.indexOf(orcc));
                        System.out.println("Free fall");
 
                    }
@@ -217,9 +217,15 @@ public class Game_Controller{
             }
             else
             temp.setTranslateX(temp.getTranslateX() -80);
-            if (orc.getHealth() <= 0) temp.setOpacity(0);
+            if (orcc.getHealth() <= 0){
+                orc_death(orcc);
+               removal.add( orc.indexOf(orcc));
+
+            }
 
         }
+       for (int orc_index : removal)
+        orc.remove(orc_index);
         if (boss_generate){
         Node temp = boss.getNode();
         if(hero.collision(temp)){
@@ -229,37 +235,95 @@ public class Game_Controller{
         }
         temp.setTranslateX(temp.getTranslateX() -80);}
         //setIsMoving(!getIsMoving());
+        for (TNT t: tnt){
+            Node temp = t.getNode();
+            if(hero.collision(temp)){
+               t.burst();
+               hero.setHealth(hero.getHealth() - 5);
+               if (hero.getHealth() <= 0) playerDeath();
+            }
+            temp.setTranslateX(temp.getTranslateX() -80);
+        }
+
+        for (Decorations d: decorationsList){
+            Node temp = d.getNode();
+            temp.setTranslateX(temp.getTranslateX() -80);
+        }
     }
     void fire(){
-
         for (Weapon w: this.player.getHero().getHelmet().getWeaponlist()){
             if (w.getActive_status()){
                 w.fire(orc,boss_generate,boss);
             }
         }
     }
+    void orc_death(Green_Orcs orc){
+        Node node = orc.getNode();
+        TranslateTransition tt = new TranslateTransition(Duration.millis(50), node);
+        tt.setFromY(node.getTranslateY());
+        tt.setToY(node.getTranslateY() - 60);
+        tt.play();
+
+
+        tt.setOnFinished(e->{
+
+            node.setTranslateY(node.getTranslateY() - 60);
+            RotateTransition rr = new RotateTransition(Duration.millis(100),node);
+            rr.setByAngle(270);
+            rr.play();
+            rr.setOnFinished(f->{
+
+                   orc.free_fall();
+
+                });
+            });
+        }
+
+
     void create_coins(){
         for (int i =0;i<10;i++){
             int index = rand.nextInt(platform.size() );
-            while (index != 0) index = rand.nextInt(platform.size() );
+            while (index == 0) index = rand.nextInt(platform.size() );
             Coins coin = new Coins(platform.get(index).getPos_x() + 40,platform.get(index).getPos_y()-40,20,20,MainAnchorPane);
             coins.add(coin);
+            platform.get(index).setObjects(platform.get(index).getObjects() + 1);
+            gameobjectlist.add(coin);
+        }
+    }
+    void create_tnt(){
+        for (int i =0;i<10;i++){
+            int index = rand.nextInt(platform.size() );
+            while (index == 0 || platform.get(index).getObjects()>2) index = rand.nextInt(platform.size());
+            TNT temp = new TNT(platform.get(index).getPos_x() + 50,platform.get(index).getPos_y()-40,10,5,40,30,MainAnchorPane,0);
+            tnt.add(temp);
+            platform.get(index).setObjects(platform.get(index).getObjects() + 1);
+            gameobjectlist.add(temp);
         }
     }
     void create_orcs(){
-        for (int i =0;i<10;i++){
+        for (int i =0;i<15;i++){
             int index = rand.nextInt(platform.size() );
-            while ( index == 0) index = rand.nextInt(platform.size());
+            while (platform.get(index).getWidth() < 80 || index == 0 || platform.get(index).getObjects()>2) index = rand.nextInt(platform.size());
             Green_Orcs temp  = new Green_Orcs(platform.get(index).getPos_x() + 40, platform.get(index).getPos_y() -40, 15, 0, 6, 40, 40, MainAnchorPane, 1);
             orc.add(temp);
+            platform.get(index).setObjects(platform.get(index).getObjects() + 1);
+            gameobjectlist.add(temp);
         }
     }
     void create_chests(){
         for (int i =0;i<10;i++){
             int index = rand.nextInt(platform.size());
-            while (platform.get(index).getWidth() < 100 && index != 0) index = rand.nextInt(platform.size());
+            while (platform.get(index).getWidth() < 100 || index == 0 || platform.get(index).getObjects()>2) index = rand.nextInt(platform.size());
             CoinChest chest1 = new CoinChest(platform.get(index).getPos_x() + 40,platform.get(index).getPos_y() -40,rand.nextInt(100),40,60,MainAnchorPane);
+            platform.get(index).setObjects(platform.get(index).getObjects() + 1);
             coinChests.add(chest1);
+            gameobjectlist.add(chest1);
+        }
+    }
+    void orcsMotion(){
+        for (int i = 0;i<6;i++) {
+            int random = rand.nextInt(orc.size());
+            orc.get(random).motion(platform.get(0));
         }
     }
     void endgame() {
@@ -289,22 +353,45 @@ public class Game_Controller{
         }
     }
 
-    void platform_check(){
+    int platform_check(){
 //        System.out.println(platform_contact);
         boolean anycontact = false;
+        int index = -1;
         for (Platform plat : platform){
-
             Node temp = plat.getNode();
             if(hero.platfrom_collision(temp)) {
                 platform_contact = true;
                 anycontact = true;
+                index = platform.indexOf(plat);
             }
+        }
 
 
 
+
+
+        if (anycontact == false) platform_contact = false;
+
+        if (!anycontact) return index;
+        return index;
+    }
+    int smallPlatformCheck(){
+        int index = -1;
+        boolean anycontact = false;
+        for (Platform plat : small_platforms){
+            Node temp = plat.getNode();
+            if(hero.platfrom_collision(temp)) {
+                platform_contact = true;
+                anycontact = true;
+                index = small_platforms.indexOf(plat);
+            }
         }
         if (anycontact == false) platform_contact = false;
+
+        if (!anycontact) return index;
+        return index;
     }
+
     void create_weapon_chests(){
         for (int i =0;i<10;i++){
             int index = rand.nextInt(platform.size());
@@ -314,6 +401,15 @@ public class Game_Controller{
             else w = new Sword ((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 20, MainAnchorPane,false);
             WeaponChest chest1 = new WeaponChest(platform.get(index).getPos_x() + 40,platform.get(index).getPos_y() -40,w,MainAnchorPane);
             weaponList.add(chest1);
+            gameobjectlist.add(chest1);
+        }
+    }
+
+    void decorate(){
+        for(Platform p : platform){
+            Birch b  = new Birch(p.getPos_x(),p.getPos_y()-p.getHeight()-30,p.getHeight()+30,40,MainAnchorPane);
+            decorationsList.add(b);
+            gameobjectlist.add(b);
         }
     }
     public void create() {
@@ -365,46 +461,48 @@ public class Game_Controller{
                 player.getHero().getHelmet().getWeaponlist().get(0).setActive_status(false);
             }
         });
+        clouds cloud1 = new clouds(200,50,50,100,MainAnchorPane);
+        clouds cloud2 = new clouds(600,50,70,90,MainAnchorPane);
+        gameobjectlist.add(cloud1);gameobjectlist.add(cloud2);
 
 
         Player player1 = new Player(130,130,0,8,30,40,MainAnchorPane,0);
         player = player1;
-        Lance lance = new Lance((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 20, MainAnchorPane,true);
-
+        Lance lance = new Lance((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 20, MainAnchorPane,false);
         Sword sword = new Sword((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY(),MainAnchorPane,true);
 
         player.getHero().getHelmet().getWeaponlist().add(lance);
         player.getHero().getHelmet().getWeaponlist().add(sword);
         System.out.println("Create 50% ");
-        Green_Orcs orc1  = new Green_Orcs(400, 160, 15, 0, 6, 40, 40, MainAnchorPane, 1);
-        TNT TNT1 = new TNT(475,160,0,0,40,40,MainAnchorPane,1);
 
         score = 0;
-
-//
-
         //hero = new Hero(130,110,0,8,40,40,MainAnchorPane,0);
         for (int i =0;i<13;i++){
-            Platform temp1 = new Platform(893*i +100,170,50, rand.nextInt(200)+40, MainAnchorPane,0);
-            Platform temp2 = new Platform(893*i +350, 170, 50,rand.nextInt(200)+50,MainAnchorPane,0);
-            Platform temp3 = new Platform(893*i +600,170,50, rand.nextInt(100)+50, MainAnchorPane,2);
-            Platform temp4 = new Platform(893*i +750,170,50, rand.nextInt(100)+40, MainAnchorPane,0);
+            Platform temp1 = new Platform(893*i +100,220,50, rand.nextInt(200)+40, MainAnchorPane,0);
+
+            Platform temp3 = new Platform(893*i +500,220,50, rand.nextInt(200)+50, MainAnchorPane,2);
+            Platform temp4 = new Platform(893*i +750,220,50, rand.nextInt(150)+40, MainAnchorPane,0);
             platform.add(temp1);
             platform.add(temp3);
-            platform.add(temp2);
+            total_platforms.add(temp1);
+            total_platforms.add(temp3);
+            total_platforms.add(temp4);
+
             platform.add(temp4);
+            gameobjectlist.add(temp1);
+
+            gameobjectlist.add(temp3);
+            gameobjectlist.add(temp4);
         }
         hero = player1.getHero();
+        gameobjectlist.add(hero);
         create_chests();
         create_orcs();
         create_coins();
         create_weapon_chests();
-
-
-
-        orc.add(orc1);
-        tnt.add(TNT1);
-
+        generateSmallIslands();
+        create_tnt();
+        decorate();
 
       System.out.println("Create success");
     }
@@ -414,6 +512,64 @@ public class Game_Controller{
 //            platform.get(2).motion();
 
 
+    void generateSmallIslands(){
+        for (int i = 0;i<9;i++){
+            Platform small = new Platform(893*i +350, 220, 50,rand.nextInt(100)+50,MainAnchorPane,2);
+            small_platforms.add(small);
+            gameobjectlist.add(small);
+            total_platforms.add(small);
+        }
+        decorateSmallTowers();
+    }
+    void moveSmall(){
+
+        for (Platform p:small_platforms){
+            p.getDecoration().motion(p.getY_speed());
+            p.motion();
+        }
+    }
+    void decorateSmallTowers(){
+        for (int i = 0;i<3;i++){
+            tower t = new tower(small_platforms.get(i*3).getPos_x()+small_platforms.get(i*3).getWidth()-50,small_platforms.get(i*3).getPos_y()-100,100,40,MainAnchorPane);
+            bush b = new bush(small_platforms.get(3*i+1).getPos_x() + small_platforms.get(3*i+1).getWidth() -30,small_platforms.get(3*i+1).getPos_y() -35,35,20,MainAnchorPane);
+            tree tr = new tree(small_platforms.get(i*3 +2).getPos_x()+small_platforms.get(i*3+2).getWidth()-40,small_platforms.get(i*3 +2).getPos_y()-90,90,30,MainAnchorPane);
+            small_platforms.get(3*i+1).setDecoration(b);
+            small_platforms.get(3*i+2).setDecoration(tr);
+            small_platforms.get(3*i).setDecoration(t);
+            gameobjectlist.add(t);
+            gameobjectlist.add(b);
+            gameobjectlist.add(tr);
+            decorationsList.add(t);
+            decorationsList.add(b);
+            decorationsList.add(tr);
+
+
+        }
+    }
+
+    void playerDeath(){
+        Node node = player.getHero().getGladiator();
+        TranslateTransition tt = new TranslateTransition(Duration.millis(50), node);
+        tt.setFromY(node.getTranslateY());
+        tt.setToY(node.getTranslateY() - 60);
+        tt.play();
+
+
+        tt.setOnFinished(e->{
+
+            node.setTranslateY(node.getTranslateY() - 60);
+            RotateTransition rr = new RotateTransition(Duration.millis(100),node);
+            rr.setByAngle(270);
+            rr.play();
+            rr.setOnFinished(f->{
+
+                hero.freefall();
+
+            });
+        });
+
+
+}
 
     void scoreIncrement(){
         int current_score = getScore();
@@ -467,12 +623,19 @@ public class Game_Controller{
         myStage.show();
 
         KeyFrame Frame = new KeyFrame(Duration.millis(50), e1->{
+           moveSmall();
+           orcsMotion();
 //            platform.get(0).motion();
 //            platform.get(1).motion();
 //            platform.get(2).motion();
 //            orc.get(0).motion(platform.get(orc.get(0).getPlatform_info()));
-            platform_check();
-            hero.motion(platform.get(hero.getPlatform_info()),platform_contact);
+//            if (platform_check() != -1) hero.motion(platform.get(platform_check()),platform_contact);
+//            else {
+//                if (smallPlatformCheck() != -1) hero.motion(small_platforms.get(smallPlatformCheck()),platform_contact);
+//                else
+//                hero.motion(platform.get(0), false);
+//            }
+            hero.jumping(total_platforms);
             death();
 
 
@@ -543,6 +706,63 @@ public class Game_Controller{
         }
         catch (Exception f){
             f.printStackTrace();
+        }
+    }
+    private void loadFile(String file,String playerFile,int gameNumber) throws IOException, ClassNotFoundException {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Game.fxml"));
+            root = (Parent) loader.load();
+            MainAnchorPane = (AnchorPane) root;
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+        Scene gameplayscene1 = new Scene(root,793,373);
+        ReGeneratePlayer regenPlayer = new ReGeneratePlayer();
+        myStage.setScene(gameplayscene1);
+        gamePlayScene=gameplayscene1;
+        player = regenPlayer.getPlayer(playerFile);
+        player.setCurr_coins(player.getCurr_coins());
+        //setupScene(gamePlayScene,myStage,currentPlayer);
+        loadtheGame(file);
+    }
+    public void loadtheGame(String filename) throws IOException, ClassNotFoundException {
+        scoreText.setText(Integer.toString(player.getCurr_coins()));
+        ReGenerate regenObs = new ReGenerate();
+        System.out.println(filename);
+        gameobjectlist = regenObs.regenerateGameObjects(filename, MainAnchorPane);
+        for(GameObjects g:gameobjectlist){
+            if(g instanceof Hero)hero=(Hero)g;
+            //g.display(MainAnchorPane);
+        }
+        gameobjectlist=new ArrayList<>();
+    }
+    public void Serialize(String fileName) throws IOException {
+        ObjectOutputStream out = null;
+        try {
+            out = new ObjectOutputStream(new FileOutputStream(fileName));
+            out.writeObject(hero);
+            for (GameObjects gameObject : gameobjectlist) {
+                out.writeObject(gameObject);
+            }
+        }finally {
+            assert out != null;
+            out.close();
+        }
+    }
+
+    public void SerializePlayer(String fileName) throws IOException {
+        ObjectOutputStream out = null;
+        try {
+            out = new ObjectOutputStream(new FileOutputStream(fileName));
+            try {
+                out.writeObject(player);
+            }
+            catch (NullPointerException e) {
+                System.out.println("PLAYER NOT INITIALIZED");
+            }
+        }finally {
+            assert out != null;
+            out.close();
         }
     }
 }

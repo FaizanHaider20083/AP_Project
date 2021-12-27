@@ -1,9 +1,10 @@
 package Will_Hero;
 import javafx.scene.layout.AnchorPane;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Player{
+public class Player implements Serializable {
     private final ArrayList<Integer> gameList;
     private int curr_coins;
     private int life_count = 1;
