@@ -108,7 +108,10 @@ class Lance extends Weapon{
             boolean collision = boss.getNode().getBoundsInParent().intersects(projectile.getBoundsInParent().getMinX(),projectile.getBoundsInParent().getMinY(),projectile.getBoundsInParent().getMinZ(),this.getRange()*20,projectile.getBoundsInParent().getHeight(),0.0);
             if (collision){
                 boss.setHealth(boss.getHealth() - 100);
-                if (boss.getHealth() <= 0)boss.getNode().setOpacity(0);
+                if (boss.getHealth() <= 0){
+                    boss.getNode().setOpacity(0);
+                    boss.setDeath_status(true);
+                }
                 System.out.println("Boss health " + boss.getHealth());
             }
             else{
@@ -222,7 +225,10 @@ class Sword extends Weapon{
             );
             if (collision){
                 boss.setHealth(boss.getHealth() - 250);
-                if (boss.getHealth() <= 0)boss.getNode().setOpacity(0);
+                if (boss.getHealth() <= 0){
+                    boss.getNode().setOpacity(0);
+                    boss.setDeath_status(true);
+                }
                 System.out.println("Boss health " + boss.getHealth());
             }
             else{

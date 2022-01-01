@@ -237,7 +237,9 @@ public class Game_Controller implements Serializable{
             boss.setHealth(boss.getHealth() -50);
             if(boss.getHealth() <= 0) temp.setOpacity(0);
             temp.setTranslateX(temp.getTranslateX()+100);
+            boss.getWeapon().setTranslateX(boss.getWeapon().getTranslateX() + 100);
         }
+            boss.getWeapon().setTranslateX(boss.getWeapon().getTranslateX() - 80);
         temp.setTranslateX(temp.getTranslateX() -80);}
         //setIsMoving(!getIsMoving());
         for (TNT t: tnt){
@@ -636,7 +638,7 @@ public class Game_Controller implements Serializable{
 }
 
 void bossManage(){
-    boss = new Boss(650,110,500,0,5,150,180,MainAnchorPane,1);
+    boss = new Boss(850,110,500,0,5,150,180,MainAnchorPane,1);
     set_boss_generate(true);
 }
 
@@ -707,10 +709,12 @@ void bossManage(){
             coinCollision();
             tntCollision();
             death();
+            playerHealthCheck();
             if (boss_generate){
 
                 boss.motion(bossPlatform);
                 bossDeath();
+                boss.attack(hero);
             }
 
 
@@ -822,6 +826,12 @@ void bossManage(){
         }finally {
             assert out != null;
             out.close();
+        }
+    }
+
+    void playerHealthCheck(){
+        if (hero.getHealth() <= 0){
+            playerDeath();
         }
     }
 
