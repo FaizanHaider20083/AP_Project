@@ -65,12 +65,15 @@ class Green_Orcs extends Orcs{
 //            this.getNode().setY(this.getNode().getY() + 8);
 //        }
 //        works but just shows result not the transition animation
-
+        System.out.println(this);
         TranslateTransition tt = new TranslateTransition(Duration.millis(2000),this.getNode());
         tt.setFromY(-20);
         System.out.println(this.getNode().getY());
         tt.setToY(350);
         tt.play();
+        tt.setOnFinished(e->{
+            this.getNode().setOpacity(0);
+        });
        // this.getNode().setOpacity(0);
     }
     private void setPath(){
@@ -193,5 +196,70 @@ class Boss extends Orcs{
         this.getAnchor().getChildren().add(node);
         this.setNode(node);
     }
+
+    public void motion(Platform plat){
+//        if(green_orc.getY()-this.getY_speed()>=plat.getIsland().getY()-40){
+//            green_orc.setY(plat.getIsland().getY()-40);
+//        }
+//        else{
+//            green_orc.setY(green_orc.getY()-this.getY_speed());
+//        }
+//        if(green_orc.getY()>=plat.getIsland().getY()-40 ||green_orc.getY()>=plat.getIsland().getY()-100){
+//            float yspeed2 = this.getY_speed();
+//            this.setY_speed(-yspeed2);
+//        }
+        if(this.getY_speed()!=0 && platfrom_collision(plat.getNode())){
+            getNode().setY(getNode().getY()-this.getY_speed());
+            if (((this.getNode().getY() >= 110 && this.getY_speed() <0)  || (this.getNode().getY() <= 40 && this.getY_speed() >0))) {
+                int y_speed2 = this.getY_speed();
+                this.setY_speed(-y_speed2);
+            }
+        }
+
+        else {
+
+            getNode().setY(getNode().getY() + 10);
+        }
+    }
+
+    boolean platfrom_collision(Node obj){
+        Bounds boundsInscreen = obj.getBoundsInParent();
+//        System.out.println("Boss data : getX " + this.getNode().getX());
+//        System.out.println("Boss data : MinX " + boundsInscreen.getMinX());
+//        System.out.println("Boss data : MaxX " + boundsInscreen.getMaxX());
+
+        return (this.getNode().getBoundsInParent().getMinX() >= boundsInscreen.getMinX() && this.getNode().getBoundsInParent().getMinX() <= boundsInscreen.getMaxX());
+//        if(check_y(boundsInscreen) && (check_x(boundsInscreen))){
+
+//            System.out.println("gladiator true " + this.getGladiator().getY() + " " + boundsInscreen.getMinY() + " " + boundsInscreen.getMaxY());
+
+//            return true;
+//        }
+//        System.out.println("Else started");
+//        System.out.println("gladiator Y " + this.getGladiator().getY());
+//        System.out.println("gladiator X " + this.getGladiator().getX());
+//        System.out.println(boundsInscreen.getMinY());System.out.println(boundsInscreen.getMaxY());
+//        System.out.println("Else finished");
+//        return false;
+    }
+
+    void free_fall(){
+//        while (this.getNode().getY() < 350){
+//            this.getNode().setY(this.getNode().getY() + 8);
+//        }
+//        works but just shows result not the transition animation
+
+        TranslateTransition tt = new TranslateTransition(Duration.millis(2000),this.getNode());
+        tt.setFromY(-110);
+        System.out.println(this.getNode().getY());
+        tt.setToY(350);
+        tt.play();
+        tt.setOnFinished(e->{
+            this.getNode().setOpacity(0);
+        });
+        // this.getNode().setOpacity(0);
+    }
+
+
 }
 

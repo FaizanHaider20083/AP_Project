@@ -61,7 +61,8 @@ public class Game_Controller implements Serializable{
     int getScore(){return this.score;}
     private Text scoreText;
     private Text cointext;
-    private ArrayList <WeaponChest> weaponList  = new ArrayList<>(); ;
+    private ArrayList <WeaponChest> weaponList  = new ArrayList<>();
+    private Platform bossPlatform ;
     ArrayList <WeaponChest> getWeaponList(){return this.weaponList;}
     ArrayList<GameObjects> gameobjectlist = new ArrayList<>();
     void death(){
@@ -151,22 +152,26 @@ public class Game_Controller implements Serializable{
                 chest.getNode().setImage(new Image(path));
                 chest.getNode().setFitWidth(60);
                 chest.getNode().setFitHeight(40);
+                // lance -> 0 sword -> 1
                 if (chest.getWeapon().getClass().equals(player.getHero().getHelmet().getWeaponlist().get(0).getClass())){
                     player.getHero().getHelmet().getWeaponlist().get(0).setActive_status(true);
                     player.getHero().getHelmet().getWeaponlist().get(1).setActive_status(false);
+                    System.out.println(chest.getWeapon().getClass());
 
                     player.getHero().getHelmet().getWeaponlist().get(0).setQuantity(player.getHero().getHelmet().getWeaponlist().get(0).getQuantity() + 1);
-                    player.getHero().getHelmet().getWeaponlist().get(0).display(MainAnchorPane);
-                    player.getHero().getHelmet().getWeaponlist().get(1).display(MainAnchorPane);
+
+                    player.getHero().getHelmet().getWeaponlist().get(1).getNode().setOpacity(0);
+                    player.getHero().getHelmet().getWeaponlist().get(0).getNode().setOpacity(1);
+
                     player.getHero().getHelmet().getWeaponlist().get(0).setRange(player.getHero().getHelmet().getWeaponlist().get(0).getRange() + 2);
                 }
                 else if (chest.getWeapon().getClass().equals(player.getHero().getHelmet().getWeaponlist().get(1).getClass())){
                     player.getHero().getHelmet().getWeaponlist().get(1).setActive_status(true);
                     player.getHero().getHelmet().getWeaponlist().get(0).setActive_status(false);
-
+                    System.out.println(chest.getWeapon().getClass());
                     player.getHero().getHelmet().getWeaponlist().get(1).setQuantity(player.getHero().getHelmet().getWeaponlist().get(1).getQuantity() + 1);
-                    player.getHero().getHelmet().getWeaponlist().get(1).display(MainAnchorPane);
-                    player.getHero().getHelmet().getWeaponlist().get(0).display(MainAnchorPane);
+                    player.getHero().getHelmet().getWeaponlist().get(1).getNode().setOpacity(1);
+                    player.getHero().getHelmet().getWeaponlist().get(0).getNode().setOpacity(0);
                     player.getHero().getHelmet().getWeaponlist().get(1).setRange(player.getHero().getHelmet().getWeaponlist().get(1).getRange() + 0.1);
 
                 }
@@ -182,11 +187,10 @@ public class Game_Controller implements Serializable{
         for (Green_Orcs orcc:orc){
             Node temp = orcc.getNode();
             //updated code here
-            // dikh jaana chahiye vaise toh but still adding multiple lines
-            // nice work though, it's fun working with you - been an absolute pleasure
+
             double distance = temp.getBoundsInParent().getMinX() - hero.getGladiator().getX();
             if (distance <= 80) {
-                System.out.println("Starting" + temp.getTranslateX());
+
                TranslateTransition tt = new TranslateTransition(Duration.millis(50), temp);
                tt.setFromX(temp.getTranslateX());
                tt.setToX(temp.getTranslateX() - distance);
@@ -194,7 +198,7 @@ public class Game_Controller implements Serializable{
 
                orcc.setHealth(orcc.getHealth() - 10);
                tt.setOnFinished(e->{
-                   System.out.println("On finished" + temp.getTranslateX());
+
                    temp.setTranslateX(temp.getTranslateX() + 60);
                   TranslateTransition tt2 = new TranslateTransition(Duration.millis(200), temp);
                    tt2.setFromX(temp.getTranslateX());
@@ -205,7 +209,8 @@ public class Game_Controller implements Serializable{
                        if(orcc.platfrom_collision(p.getNode())) contact = true;
                    }
                    if (!contact) {
-                       orcc.free_fall();
+                       orcc.setHealth(0);
+                      orc_death(orcc);
                        removal.add(orc.indexOf(orcc));
                        System.out.println("Free fall");
 
@@ -253,7 +258,7 @@ public class Game_Controller implements Serializable{
     void fire(){
         for (Weapon w: this.player.getHero().getHelmet().getWeaponlist()){
             if (w.getActive_status()){
-                w.fire(orc,boss_generate,boss);
+                w.fire(orc,boss_generate,boss,hero);
             }
         }
     }
@@ -294,7 +299,10 @@ public class Game_Controller implements Serializable{
         for (int i =0;i<10;i++){
             int index = rand.nextInt(platform.size() );
             while (index == 0 || platform.get(index).getObjects()>2) index = rand.nextInt(platform.size());
-            TNT temp = new TNT(platform.get(index).getPos_x() + 50,platform.get(index).getPos_y()-40,10,5,40,30,MainAnchorPane,0);
+            float distance = 50;
+            if (platform.get(index).getWidth() < 50) distance = 20;
+            if (platform.get(index).getObjects() > 0) distance = platform.get(index).getWidth()-50;
+            TNT temp = new TNT(platform.get(index).getPos_x() + 20,platform.get(index).getPos_y()-30,10,5,40,30,MainAnchorPane,0);
             tnt.add(temp);
             platform.get(index).setObjects(platform.get(index).getObjects() + 1);
             gameobjectlist.add(temp);
@@ -303,27 +311,75 @@ public class Game_Controller implements Serializable{
     void create_orcs(){
         for (int i =0;i<15;i++){
             int index = rand.nextInt(platform.size() );
-            while (platform.get(index).getWidth() < 80 || index == 0 || platform.get(index).getObjects()>2) index = rand.nextInt(platform.size());
-            Green_Orcs temp  = new Green_Orcs(platform.get(index).getPos_x() + 40, platform.get(index).getPos_y() -40, 15, 0, 6, 40, 40, MainAnchorPane, 1);
+            while (platform.get(index).getWidth() < 140 || index == 0 || platform.get(index).getObjects()>2) index = rand.nextInt(platform.size());
+            float distance = 40;
+            if (platform.get(index).getObjects() > 0) distance = platform.get(index).getWidth()-50;
+            Green_Orcs temp  = new Green_Orcs(platform.get(index).getPos_x() + distance, platform.get(index).getPos_y() -40, 15, 0, 9, 40, 40, MainAnchorPane, 1);
             orc.add(temp);
             platform.get(index).setObjects(platform.get(index).getObjects() + 1);
             gameobjectlist.add(temp);
+        }
+    }
+    void coinCollision(){
+        int index = -1;
+        for (Coins c: coins){
+            Node node = c.getNode();
+            if (node.getBoundsInParent().intersects(hero.getGladiator().getBoundsInParent())){
+                c.getNode().setOpacity(0);
+                c.getNode().setY(350);
+                index = coins.indexOf(c);
+            }
+        }
+        if (index != -1){
+            coins.remove(index);
+        }
+    }
+    void tntCollision(){
+        int index = -1;
+        for (TNT t: tnt){
+            Node node = t.getNode();
+            if (node.getBoundsInParent().intersects(hero.getGladiator().getBoundsInParent()) || hero.collision(node)){
+                t.burst();
+                hero.setHealth(hero.getHealth() - 5);
+                if (hero.getHealth() <= 0) playerDeath();
+            }
+        }
+        if (index != -1){
+            coins.remove(index);
         }
     }
     void create_chests(){
         for (int i =0;i<10;i++){
             int index = rand.nextInt(platform.size());
             while (platform.get(index).getWidth() < 100 || index == 0 || platform.get(index).getObjects()>2) index = rand.nextInt(platform.size());
-            CoinChest chest1 = new CoinChest(platform.get(index).getPos_x() + 40,platform.get(index).getPos_y() -40,rand.nextInt(100),40,60,MainAnchorPane);
+
+            float distance = 40;
+            if (platform.get(index).getObjects() > 0) distance = platform.get(index).getWidth()-50;
+            CoinChest chest1 = new CoinChest(platform.get(index).getPos_x() + distance,platform.get(index).getPos_y() -35,rand.nextInt(100),40,60,MainAnchorPane);
             platform.get(index).setObjects(platform.get(index).getObjects() + 1);
             coinChests.add(chest1);
+            platform.get(index).setObjects(platform.get(index).getObjects() + 1);
             gameobjectlist.add(chest1);
         }
     }
     void orcsMotion(){
         for (int i = 0;i<6;i++) {
-            int random = rand.nextInt(orc.size());
+            int seed = orc.size();
+            if (seed <= 0) seed = 1;
+            int random = rand.nextInt(seed);
+            if (random < orc.size())
             orc.get(random).motion(platform.get(0));
+        }
+    }
+
+    void bossDeath(){
+        if (boss_generate){
+            if (!boss.platfrom_collision(bossPlatform.getNode()))
+            {
+                boss.free_fall();
+                System.out.println("Boss free falll");
+            }
+
         }
     }
     void endgame() {
@@ -393,19 +449,21 @@ public class Game_Controller implements Serializable{
     }
 
     void create_weapon_chests(){
-        for (int i =0;i<10;i++){
+        for (int i =0;i<6;i++){
             int index = rand.nextInt(platform.size());
             Weapon w;
-            while (platform.get(index).getWidth() < 100 && index != 0) index = rand.nextInt(platform.size());
-            if (index %2 ==0) w = new Lance ((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 20, MainAnchorPane,false);
-            else w = new Sword ((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 20, MainAnchorPane,false);
-            WeaponChest chest1 = new WeaponChest(platform.get(index).getPos_x() + 40,platform.get(index).getPos_y() -40,w,MainAnchorPane);
+            while (platform.get(index).getWidth() < 140 || index == 0  || platform.get(index).getObjects()>2) index = rand.nextInt(platform.size());
+            if (index %2 ==0) w = new Lance ((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 10, MainAnchorPane,false);
+            else w = new Sword ((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 10, MainAnchorPane,false);
+            WeaponChest chest1 = new WeaponChest(platform.get(index).getPos_x() + 40,platform.get(index).getPos_y() -28,w,MainAnchorPane);
             weaponList.add(chest1);
+            platform.get(index).setObjects(platform.get(index).getObjects() + 1);
             gameobjectlist.add(chest1);
         }
     }
 
     void decorate(){
+
         for(Platform p : platform){
             Birch b  = new Birch(p.getPos_x(),p.getPos_y()-p.getHeight()-30,p.getHeight()+30,40,MainAnchorPane);
             decorationsList.add(b);
@@ -468,8 +526,8 @@ public class Game_Controller implements Serializable{
 
         Player player1 = new Player(130,130,0,8,30,40,MainAnchorPane,0);
         player = player1;
-        Lance lance = new Lance((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 20, MainAnchorPane,false);
-        Sword sword = new Sword((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY(),MainAnchorPane,true);
+        Lance lance = new Lance((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 60, MainAnchorPane,true);
+        Sword sword = new Sword((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY(),MainAnchorPane,false);
 
         player.getHero().getHelmet().getWeaponlist().add(lance);
         player.getHero().getHelmet().getWeaponlist().add(sword);
@@ -478,22 +536,28 @@ public class Game_Controller implements Serializable{
         score = 0;
         //hero = new Hero(130,110,0,8,40,40,MainAnchorPane,0);
         for (int i =0;i<13;i++){
-            Platform temp1 = new Platform(893*i +100,220,50, rand.nextInt(200)+40, MainAnchorPane,0);
+            if (i!=10) {
+                Platform temp1 = new Platform(893 * i + 100, 220, 50, rand.nextInt(200) + 40, MainAnchorPane, 0);
 
-            Platform temp3 = new Platform(893*i +500,220,50, rand.nextInt(200)+50, MainAnchorPane,2);
-            Platform temp4 = new Platform(893*i +750,220,50, rand.nextInt(150)+40, MainAnchorPane,0);
-            platform.add(temp1);
-            platform.add(temp3);
-            total_platforms.add(temp1);
-            total_platforms.add(temp3);
-            total_platforms.add(temp4);
+                Platform temp3 = new Platform(893 * i + 500, 220, 50, rand.nextInt(200) + 50, MainAnchorPane, 2);
+                Platform temp4 = new Platform(893 * i + 750, 220, 50, rand.nextInt(150) + 40, MainAnchorPane, 0);
+                platform.add(temp1);
+                platform.add(temp3);
+                total_platforms.add(temp1);
+                total_platforms.add(temp3);
+                total_platforms.add(temp4);
 
-            platform.add(temp4);
-            gameobjectlist.add(temp1);
+                platform.add(temp4);
+                gameobjectlist.add(temp1);
 
-            gameobjectlist.add(temp3);
-            gameobjectlist.add(temp4);
+                gameobjectlist.add(temp3);
+                gameobjectlist.add(temp4);
+            }
         }
+        bossPlatform = new Platform(9100, 290, 50, 600, MainAnchorPane, 0);
+        gameobjectlist.add(bossPlatform);
+        platform.add(bossPlatform);
+        total_platforms.add(bossPlatform);
         hero = player1.getHero();
         gameobjectlist.add(hero);
         create_chests();
@@ -503,7 +567,7 @@ public class Game_Controller implements Serializable{
         generateSmallIslands();
         create_tnt();
         decorate();
-
+        hero.getGladiator().toFront();
       System.out.println("Create success");
     }
 
@@ -571,16 +635,20 @@ public class Game_Controller implements Serializable{
 
 }
 
+void bossManage(){
+    boss = new Boss(650,110,500,0,5,150,180,MainAnchorPane,1);
+    set_boss_generate(true);
+}
+
     void scoreIncrement(){
         int current_score = getScore();
         current_score++;
         setScore(current_score );
         scoreText.setText(Integer.toString(current_score));
-        if (current_score  >= 10 && get_boss_generated() == false ){
-             boss = new Boss(650,20,500,0,0,150,180,MainAnchorPane,1);
-            set_boss_generate(true);
+        if (current_score  >= 107 && get_boss_generated() == false ){
+            bossManage();
         }
-        if (current_score >= 125) endgame();
+        if (current_score >= 120) endgame();
 
 
     }
@@ -636,7 +704,14 @@ public class Game_Controller implements Serializable{
 //                hero.motion(platform.get(0), false);
 //            }
             hero.jumping(total_platforms);
+            coinCollision();
+            tntCollision();
             death();
+            if (boss_generate){
+
+                boss.motion(bossPlatform);
+                bossDeath();
+            }
 
 
         });

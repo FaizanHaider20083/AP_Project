@@ -41,7 +41,7 @@ abstract class Weapon extends GameObjects{
         this.quantity = 0;
         this.setNode(new ImageView());
     }
-    abstract public void fire(ArrayList <Green_Orcs> orc,boolean boss_generate, Boss boss);
+    abstract public void fire(ArrayList <Green_Orcs> orc,boolean boss_generate, Boss boss, Hero hero);
     public float getWidth() { return width; }
     public float getHeight() { return height; }
     public AnchorPane getAnchor() { return anchor; }
@@ -68,13 +68,13 @@ class Lance extends Weapon{
         setQuantity(0);
     }
     @Override
-    public void fire(ArrayList <Green_Orcs> orcs,boolean boss_generate, Boss boss){
+    public void fire(ArrayList <Green_Orcs> orcs,boolean boss_generate, Boss boss, Hero hero){
         System.out.println("Lance fire");
         Image fire = new Image(this.getPath());
         ImageView projectile = new ImageView(fire);
         projectile.setX(160);
 
-        projectile.setY(super.getPos_y());
+        projectile.setY(hero.getGladiator().getY());
         projectile.setFitHeight(15);
         projectile.setFitWidth(40);
         this.getAnchor().getChildren().add(projectile);
@@ -122,7 +122,7 @@ class Lance extends Weapon{
 
     }
     public void display(AnchorPane pane){
-        if (this.getActive_status()){
+
         this.setPath("assets/lance.png");
         Image image = new Image(this.getPath());
         ImageView node = getNode();
@@ -133,12 +133,12 @@ class Lance extends Weapon{
         System.out.println(this.getHeight() + " " + this.getWidth());
         node.setFitHeight(15);
         node.setFitWidth(40);
-        if (this.getQuantity() == 1)
+
         this.getAnchor().getChildren().add(node);
-        setNode(node);}
-        else {
-            this.getNode().setOpacity(0);
-        }
+        setNode(node);
+
+        this.getNode().setOpacity(0);
+
 
     }
 }
@@ -149,10 +149,10 @@ class Sword extends Weapon{
         this.setAnchor(pane);
         this.display(pane);
         this.setPath("assets/sword2.png");
-        setQuantity(0);
+        setQuantity(1);
     }
     public void display(AnchorPane pane){
-        if (this.getActive_status()){
+
             this.setPath("assets/sword2.png");
             Image image = new Image(this.getPath());
             ImageView node = new ImageView(image);
@@ -162,20 +162,20 @@ class Sword extends Weapon{
             System.out.println(this.getHeight() + " " + this.getWidth());
             node.setFitHeight(25);
             node.setFitWidth(10);
-            if (this.getQuantity() == 1)
+
             this.getAnchor().getChildren().add(node);
-            setNode(node);}
-        else {
+            setNode(node);
+
             this.getNode().setOpacity(0);
-        }
+
 
     }
     @Override
-    public void fire(ArrayList <Green_Orcs> orcs,boolean boss_generate, Boss boss){
+    public void fire(ArrayList <Green_Orcs> orcs,boolean boss_generate, Boss boss,Hero hero){
         System.out.println("Sword fire");
         Circle cir = new Circle();
         cir.setCenterX(this.getPos_x());
-        cir.setCenterY(this.getPos_y());
+        cir.setCenterY(hero.getGladiator().getY());
         cir.setRadius(1);
         RadialGradient rg = new RadialGradient(360,0.4,0.5,0.5,0.5,true, CycleMethod.NO_CYCLE,new Stop(.5f,Color.GOLDENROD),new Stop(0,Color.color(1,1,1)));
         cir.setFill(rg);
@@ -251,7 +251,7 @@ public class Hero extends GameObjects{
         super(x, y);
         this.x_speed = x_speed;
         this.y_speed= y_speed;
-        this.health = 20;
+        this.health = 200;
         this.helmet = new Helmet();
         this.boss_status = false;
         this.height = height;
@@ -340,10 +340,13 @@ public class Hero extends GameObjects{
         System.out.println(this.getGladiator().getY());
         tt.setToY(350);
         tt.play();
+        tt.setOnFinished(e->{
+            this.getGladiator().setY(350);
+        });
         // this.getNode().setOpacity(0);
     }
     boolean collision(Node obj){
-        Bounds boundsInscreen = obj.localToParent(obj.getBoundsInLocal());//h-40 w-30
+        Bounds boundsInscreen = obj.getBoundsInParent();//h-40 w-30
         //this.getPos_y() +this.getHeight()>= boundsInscreen.getMinY() && this.getPos_y() <= boundsInscreen.getMaxY()
 //        if ((this.getPos_x() + this.getWidth() <= boundsInscreen.getMinX() && this.getPos_x()+ this.getWidth() +80>= boundsInscreen.getMinX() ) && ( (this.getPos_y() >= boundsInscreen.getMinY() && this.getPos_y()  <= boundsInscreen.getMaxY()) || (this.getPos_y() +this.getHeight() >= boundsInscreen.getMinY() && this.getPos_y() +this.getHeight() <= boundsInscreen.getMaxY()))){
 //            System.out.println("Collision");
@@ -368,6 +371,7 @@ public class Hero extends GameObjects{
             if (this.getGladiator().getX() <= boundsInscreen.getMinX() && this.getGladiator().getX() +80 >= boundsInscreen.getMinX())
                 if (this.getGladiator().getY() <= boundsInscreen.getMinY() && this.getGladiator().getY() +this.getHeight() >= boundsInscreen.getMinY())
                     return true;
+                else if (boundsInscreen.getMaxY() - boundsInscreen.getMinY() > this.getHeight()) return  true;
 
             return false;
         }
@@ -386,11 +390,17 @@ public class Hero extends GameObjects{
     public void setY_speed(float y_speed) { this.y_speed = y_speed; }
 
     public void jumping(ArrayList<Platform> platformList){
+        Weapon w = this.getHelmet().getWeaponlist().get(0);
+        for (int i =0;i<this.getHelmet().getWeaponlist().size();i++){
+            if(this.getHelmet().getWeaponlist().get(i).getActive_status())
+                w = this.getHelmet().getWeaponlist().get(i);
+        }
         int contact = -1;
         for (Platform p:platformList) {
             Bounds platformBounds = p.getNode().getBoundsInParent();
             if (this.getGladiator().getX() + this.getWidth() >= platformBounds.getMinX() && this.getGladiator().getX() <= platformBounds.getMaxX()) {
                 Gladiator.setY(Gladiator.getY() - this.getY_speed());
+                w.getNode().setY(Gladiator.getY() - this.getY_speed());
                 contact = 0;
                 System.out.println("true");
                 if (((this.getGladiator().getY() >= p.getNode().getY() - 40 && this.getGladiator().getY() <= p.getNode().getY() - 10 && this.getY_speed() <0)  || (this.getGladiator().getY() <= p.getNode().getY() - 100 && this.getGladiator().getY() <= p.getNode().getY() - 130 && this.getY_speed() >0))) {
