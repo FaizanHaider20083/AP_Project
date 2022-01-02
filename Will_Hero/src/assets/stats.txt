@@ -1,13 +1,13 @@
-Boss Killed - 23
-Moves made - 5903
-TNT's burst - 1323
-Orc's killed - 1667
-Coins collected - 814302
+Boss Killed - 26
+Moves made - 6456
+TNT's burst - 1569
+Orc's killed - 1756
+Coins collected - 6424579
 Coins spent - 270000
-Platforms jumped - 104837
-Distance travelled - 472240
-Coin Chests opened - 1439
-Weapon Chests opened - 1551
-Times attacked - 87613
-Times died - 375
-Times fallen to death - 248
+Platforms jumped - 139470
+Distance travelled - 516480
+Coin Chests opened - 1919
+Weapon Chests opened - 1695
+Times attacked - 87664
+Times died - 3623
+Times fallen to death - 3213

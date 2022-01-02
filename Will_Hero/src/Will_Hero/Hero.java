@@ -6,6 +6,8 @@ import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.RadialGradient;
@@ -13,6 +15,7 @@ import javafx.scene.paint.Stop;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 class Helmet implements Serializable {
@@ -80,7 +83,7 @@ class Lance extends Weapon{
         projectile.setX(160);
 
         projectile.setY(hero.getGladiator().getY());
-        projectile.setFitHeight(15);
+        projectile.setFitHeight(25);
         projectile.setFitWidth(40);
         this.getAnchor().getChildren().add(projectile);
         TranslateTransition tt = new TranslateTransition(Duration.millis(400),projectile);
@@ -91,6 +94,10 @@ class Lance extends Weapon{
         for (Green_Orcs g: orcs){
             boolean collision = g.getNode().getBoundsInParent().intersects(projectile.getBoundsInParent().getMinX(),projectile.getBoundsInParent().getMinY(),projectile.getBoundsInParent().getMinZ(),this.getRange()*20,this.getHeight(),0.0);
             if (collision){
+                Media sound = new Media(new File("src/assets/death.mp3").toURI().toString());
+                MediaPlayer mplayer = new MediaPlayer(sound);
+
+                mplayer.play();
                 g.getNode().setOpacity(0);
                 removal = orcs.indexOf(g);
 //                System.out.println("Came here " + orcs.indexOf(g));
@@ -116,6 +123,10 @@ class Lance extends Weapon{
                 if (boss.getHealth() <= 0){
                     boss.getNode().setOpacity(0);
                     boss.setDeath_status(true);
+                    Media sound = new Media(new File("src/assets/death.mp3").toURI().toString());
+                    MediaPlayer mplayer = new MediaPlayer(sound);
+
+                    mplayer.play();
                 }
                 System.out.println("Boss health " + boss.getHealth());
             }
@@ -201,6 +212,10 @@ class Sword extends Weapon{
         for (Green_Orcs g: orcs){
             boolean collision = g.getNode().getBoundsInParent().intersects(cir.getBoundsInParent().getMinX(),cir.getBoundsInParent().getMinY(),cir.getBoundsInParent().getMinZ(),this.getRange()*20,cir.getBoundsInParent().getHeight(),0.0);
             if (collision){
+                Media sound = new Media(new File("src/assets/death.mp3").toURI().toString());
+                MediaPlayer mplayer = new MediaPlayer(sound);
+
+                mplayer.play();
                 g.getNode().setOpacity(0);
                 removal = orcs.indexOf(g);
 //                System.out.println("Came here " + orcs.indexOf(g));
@@ -233,6 +248,10 @@ class Sword extends Weapon{
                 if (boss.getHealth() <= 0){
                     boss.getNode().setOpacity(0);
                     boss.setDeath_status(true);
+                    Media sound = new Media(new File("src/assets/death.mp3").toURI().toString());
+                    MediaPlayer mplayer = new MediaPlayer(sound);
+
+                    mplayer.play();
                 }
                 System.out.println("Boss health " + boss.getHealth());
             }

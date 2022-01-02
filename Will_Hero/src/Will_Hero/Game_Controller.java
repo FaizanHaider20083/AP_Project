@@ -16,11 +16,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
@@ -101,20 +104,21 @@ public class Game_Controller implements Serializable, Initializable{
         }
     }
     void death(){
-        stat.setDied(stat.getDied() + 1);
-        stat.setFallen(stat.getFallen() + 1);
-        stat.setCoins(stat.getCoins() + player.getCurr_coins());
-        stat.setPlatform(stat.getPlatform() + score /3);
-        try {
-            stat.writeData();
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }
-        total_coins_for_revival = player.getCurr_coins();
-        System.out.println(player.getCurr_coins());
+
         if (hero.getGladiator().getY() > 300)
         try {
+            stat.setDied(stat.getDied() + 1);
+            stat.setFallen(stat.getFallen() + 1);
+            stat.setCoins(stat.getCoins() + player.getCurr_coins());
+            stat.setPlatform(stat.getPlatform() + score /3);
+            try {
+                stat.writeData();
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
+            total_coins_for_revival = player.getCurr_coins();
+            System.out.println(player.getCurr_coins());
             System.out.println("Tch Tch");
             if(time!=null){
                 time.pause();
@@ -165,6 +169,10 @@ public class Game_Controller implements Serializable, Initializable{
                 player.setCurr_coins((player.getCurr_coins() + 10));
                 cointext.setText(Integer.toString(player.getCurr_coins()));
                 temp.setOpacity(0);
+                Media sound = new Media(new File("src/assets/coinSound.mp3").toURI().toString());
+                MediaPlayer mplayer = new MediaPlayer(sound);
+
+                mplayer.play();
                 System.out.println("Coin collision");
             }
             temp.setTranslateX(temp.getTranslateX() -80);
@@ -178,6 +186,11 @@ public class Game_Controller implements Serializable, Initializable{
                 path = path.substring(0,path.length()-4) + "_open.png";
                 System.out.println(path);
                 stat.setCoinChests(stat.getCoinChests() + 1);
+
+                Media sound = new Media(new File("src/assets/coinSound.mp3").toURI().toString());
+                MediaPlayer mplayer = new MediaPlayer(sound);
+
+                mplayer.play();
                 chest.getNode().setImage(new Image(path));
                 player.setCurr_coins(player.getCurr_coins() + chest.getCoin_count());
                 cointext.setText(Integer.toString(player.getCurr_coins()));
@@ -190,6 +203,10 @@ public class Game_Controller implements Serializable, Initializable{
             Node temp = chest.getNode();
             if(hero.collision(temp)){
                 String path = chest.getPath();
+                Media sound = new Media(new File("src/assets/weaponChest.mp3").toURI().toString());
+                MediaPlayer mplayer = new MediaPlayer(sound);
+
+                mplayer.play();
                 stat.setWeaponChests(stat.getWeaponChests() + 1);
                 path = path.substring(0,path.length()-4) + "_open.png";
                 System.out.println(chest.getWeapon());
@@ -251,6 +268,10 @@ public class Game_Controller implements Serializable, Initializable{
                    if (!contact) {
                        orcc.setHealth(0);
                       orc_death(orcc);
+                       Media sound = new Media(new File("src/assets/death.mp3").toURI().toString());
+                       MediaPlayer mplayer = new MediaPlayer(sound);
+
+                       mplayer.play();
                       stat.setOrcs(stat.getOrcs() + 1);
                        removal.add(orc.indexOf(orcc));
                        System.out.println("Free fall");
@@ -268,6 +289,10 @@ public class Game_Controller implements Serializable, Initializable{
             }
             if (orcc.getHealth() <= 0){
                 orc_death(orcc);
+                Media sound = new Media(new File("src/assets/death.mp3").toURI().toString());
+                MediaPlayer mplayer = new MediaPlayer(sound);
+
+                mplayer.play();
                removal.add( orc.indexOf(orcc));
 
             }
@@ -294,7 +319,13 @@ public class Game_Controller implements Serializable, Initializable{
             if(hero.collision(temp)){
                t.burst();
                hero.setHealth(hero.getHealth() - 5);
-               if (hero.getHealth() <= 0) playerDeath();
+               if (hero.getHealth() <= 0) {
+                   playerDeath();
+                   Media sound = new Media(new File("src/assets/death.mp3").toURI().toString());
+                   MediaPlayer mplayer = new MediaPlayer(sound);
+
+                   mplayer.play();
+               }
             }
             temp.setTranslateX(temp.getTranslateX() -80);
         }
@@ -384,6 +415,10 @@ public class Game_Controller implements Serializable, Initializable{
                 c.getNode().setOpacity(0);
                 c.getNode().setY(350);
                 index = coins.indexOf(c);
+                Media sound = new Media(new File("src/assets/coinSound.mp3").toURI().toString());
+                MediaPlayer mplayer = new MediaPlayer(sound);
+
+                mplayer.play();
                 player.setCurr_coins(player.getCurr_coins()+10);
                 cointext.setText(Integer.toString(player.getCurr_coins()));
             }
@@ -400,7 +435,13 @@ public class Game_Controller implements Serializable, Initializable{
                 t.burst();
                 stat.setTnt(stat.getTnt() + 1);
                 hero.setHealth(hero.getHealth() - 5);
-                if (hero.getHealth() <= 0) playerDeath();
+                if (hero.getHealth() <= 0){
+                    playerDeath();
+                    Media sound = new Media(new File("src/assets/death.mp3").toURI().toString());
+                    MediaPlayer mplayer = new MediaPlayer(sound);
+
+                    mplayer.play();
+                }
             }
         }
         if (index != -1){
@@ -430,8 +471,13 @@ public class Game_Controller implements Serializable, Initializable{
                 stat.setCoinChests(stat.getCoinChests() + 1);
                 path = path.substring(0,path.length()-4) + "_open.png";
                 System.out.println(path);
+                Media sound = new Media(new File("src/assets/coinSound.mp3").toURI().toString());
+                MediaPlayer mplayer = new MediaPlayer(sound);
+
+                mplayer.play();
                 chest.getNode().setImage(new Image(path));
                 player.setCurr_coins(player.getCurr_coins() + chest.getCoin_count());
+
                 cointext.setText(Integer.toString(player.getCurr_coins()));
             }
         }
@@ -442,6 +488,10 @@ public class Game_Controller implements Serializable, Initializable{
                 stat.setWeaponChests(stat.getWeaponChests() + 1);
                 path = path.substring(0,path.length()-4) + "_open.png";
                 System.out.println(chest.getWeapon());
+                Media sound = new Media(new File("src/assets/weaponChest.mp3").toURI().toString());
+                MediaPlayer mplayer = new MediaPlayer(sound);
+
+                mplayer.play();
                 chest.getNode().setImage(new Image(path));
                 chest.getNode().setFitWidth(60);
                 chest.getNode().setFitHeight(40);
@@ -640,6 +690,9 @@ public class Game_Controller implements Serializable, Initializable{
                 player.getHero().getHelmet().getWeaponlist().get(0).setActive_status(false);
             }
         });
+        for (int i = 0;i<10;i++){
+            Red_Orcs r = new Red_Orcs(150,300,50,10,0,40,20,new AnchorPane(),0);
+        }
         clouds cloud1 = new clouds(200,50,50,100,MainAnchorPane);
         clouds cloud2 = new clouds(600,50,70,90,MainAnchorPane);
         gameobjectlist.add(cloud1);gameobjectlist.add(cloud2);
@@ -732,6 +785,8 @@ public class Game_Controller implements Serializable, Initializable{
     }
 
     void playerDeath()  {
+        if (boss_generate)
+        boss.getNode().setOpacity(0);
         stat.setDied(stat.getDied() + 1);
         stat.setPlatform(stat.getPlatform() + score /3);
         try{
