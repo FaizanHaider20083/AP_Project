@@ -580,13 +580,16 @@ public class Game_Controller implements Serializable, Initializable{
             gameobjectlist.add(b);
         }
     }
-    public void create(){
+    public void create() throws FileNotFoundException {
         /*
         to gauge if this works or not do this
         1.comment out the creation/method of everything related to orc1, check out this in the keyevent of play method too
         2.run
         3. The platforms should work perfectly fine with plat2 moving up and down
         */
+        Stats stat = new Stats();
+        System.out.println(System.getProperty("user.dir"));
+        System.out.println(" " + System.getProperty("user.dir"));
         helmet = new Helmet();
         Player player1 = new Player();
         hero = new Hero (130,130,0,8,30,40,0, helmet);
@@ -787,7 +790,7 @@ void bossManage(){
         }
     }
     @FXML
-    void play(ActionEvent e){
+    void play(ActionEvent e) throws FileNotFoundException {
 
         this.rand = new Random();
         platform_contact = true;
