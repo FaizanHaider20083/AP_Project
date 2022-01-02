@@ -1,13 +1,13 @@
-Hours Played - 23
-Moves made - 5891
+Boss Killed - 23
+Moves made - 5903
 TNT's burst - 1323
 Orc's killed - 1667
-Coins collected - 814022
+Coins collected - 814302
 Coins spent - 270000
 Platforms jumped - 104837
-Distance travelled - 471280
+Distance travelled - 472240
 Coin Chests opened - 1439
 Weapon Chests opened - 1551
 Times attacked - 87613
-Times died - 270
-Times fallen to death - 143
+Times died - 375
+Times fallen to death - 248

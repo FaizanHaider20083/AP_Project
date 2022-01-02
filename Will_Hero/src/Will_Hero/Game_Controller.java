@@ -70,6 +70,7 @@ public class Game_Controller implements Serializable, Initializable{
     int getScore(){return this.score;}
     private Text scoreText;
     private Text cointext;
+    private Stats stat ;
     private AnchorPane reviveMenuAnchorPane;
     private ArrayList <WeaponChest> weaponList  = new ArrayList<>();
     private Platform bossPlatform ;
@@ -100,6 +101,16 @@ public class Game_Controller implements Serializable, Initializable{
         }
     }
     void death(){
+        stat.setDied(stat.getDied() + 1);
+        stat.setFallen(stat.getFallen() + 1);
+        stat.setCoins(stat.getCoins() + player.getCurr_coins());
+        stat.setPlatform(stat.getPlatform() + score /3);
+        try {
+            stat.writeData();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
         total_coins_for_revival = player.getCurr_coins();
         System.out.println(player.getCurr_coins());
         if (hero.getGladiator().getY() > 300)
@@ -131,6 +142,8 @@ public class Game_Controller implements Serializable, Initializable{
 
     }
     void move(){
+        stat.setMoves(stat.getMoves() + 1);
+        stat.setDistance(stat.getDistance() + 80);
         setIsMoving(!getIsMoving());
         for (Platform plat : platform){
             Node temp = plat.getNode();
@@ -164,6 +177,7 @@ public class Game_Controller implements Serializable, Initializable{
                 String path = chest.getPath();
                 path = path.substring(0,path.length()-4) + "_open.png";
                 System.out.println(path);
+                stat.setCoinChests(stat.getCoinChests() + 1);
                 chest.getNode().setImage(new Image(path));
                 player.setCurr_coins(player.getCurr_coins() + chest.getCoin_count());
                 cointext.setText(Integer.toString(player.getCurr_coins()));
@@ -176,6 +190,7 @@ public class Game_Controller implements Serializable, Initializable{
             Node temp = chest.getNode();
             if(hero.collision(temp)){
                 String path = chest.getPath();
+                stat.setWeaponChests(stat.getWeaponChests() + 1);
                 path = path.substring(0,path.length()-4) + "_open.png";
                 System.out.println(chest.getWeapon());
                 chest.getNode().setImage(new Image(path));
@@ -236,6 +251,7 @@ public class Game_Controller implements Serializable, Initializable{
                    if (!contact) {
                        orcc.setHealth(0);
                       orc_death(orcc);
+                      stat.setOrcs(stat.getOrcs() + 1);
                        removal.add(orc.indexOf(orcc));
                        System.out.println("Free fall");
 
@@ -263,7 +279,10 @@ public class Game_Controller implements Serializable, Initializable{
         Node temp = boss.getNode();
         if(hero.collision(temp)){
             boss.setHealth(boss.getHealth() -50);
-            if(boss.getHealth() <= 0) temp.setOpacity(0);
+            if(boss.getHealth() <= 0) {
+                temp.setOpacity(0);
+                stat.setHours(stat.getHours() + 1);
+            }
             temp.setTranslateX(temp.getTranslateX()+100);
             boss.getWeapon().setTranslateX(boss.getWeapon().getTranslateX() + 100);
         }
@@ -288,6 +307,7 @@ public class Game_Controller implements Serializable, Initializable{
         }
     }
     void fire(){
+        stat.setAttack(stat.getAttack() + 1);
         for (Weapon w: this.player.getHero().getHelmet().getWeaponlist()){
             if (w.getActive_status()){
                 w.fire(orc,boss_generate,boss,hero);
@@ -378,6 +398,7 @@ public class Game_Controller implements Serializable, Initializable{
             Node node = t.getNode();
             if (node.getBoundsInParent().intersects(hero.getGladiator().getBoundsInParent()) || hero.collision(node)){
                 t.burst();
+                stat.setTnt(stat.getTnt() + 1);
                 hero.setHealth(hero.getHealth() - 5);
                 if (hero.getHealth() <= 0) playerDeath();
             }
@@ -406,6 +427,7 @@ public class Game_Controller implements Serializable, Initializable{
             Node node = chest.getNode();
             if (node.getBoundsInParent().intersects(hero.getGladiator().getBoundsInParent())){
                 String path = chest.getPath();
+                stat.setCoinChests(stat.getCoinChests() + 1);
                 path = path.substring(0,path.length()-4) + "_open.png";
                 System.out.println(path);
                 chest.getNode().setImage(new Image(path));
@@ -417,6 +439,7 @@ public class Game_Controller implements Serializable, Initializable{
             Node temp = chest.getNode();
             if(hero.collision(temp)){
                 String path = chest.getPath();
+                stat.setWeaponChests(stat.getWeaponChests() + 1);
                 path = path.substring(0,path.length()-4) + "_open.png";
                 System.out.println(chest.getWeapon());
                 chest.getNode().setImage(new Image(path));
@@ -466,6 +489,7 @@ public class Game_Controller implements Serializable, Initializable{
             if (!boss.platfrom_collision(bossPlatform.getNode()))
             {
                 boss.free_fall();
+                stat.setHours(stat.getHours()+1);
                 System.out.println("Boss free falll");
             }
 
@@ -473,6 +497,10 @@ public class Game_Controller implements Serializable, Initializable{
     }
     void endgame() {
         try {
+            stat.setCoins(stat.getCoins() + player.getCurr_coins());
+            stat.setHours(stat.getHours() + 1);
+            stat.setPlatform(stat.getPlatform() + score /3);
+            stat.writeData();
             System.out.println("Sayonara");
             if(time!=null){
                 time.pause();
@@ -556,13 +584,14 @@ public class Game_Controller implements Serializable, Initializable{
             gameobjectlist.add(b);
         }
     }
-    public void create(){
+    public void create() throws FileNotFoundException {
         /*
         to gauge if this works or not do this
         1.comment out the creation/method of everything related to orc1, check out this in the keyevent of play method too
         2.run
         3. The platforms should work perfectly fine with plat2 moving up and down
         */
+        this.stat = new Stats();
         helmet = new Helmet();
         Player player1 = new Player();
         hero = new Hero (130,130,0,8,30,40,0, helmet);
@@ -702,7 +731,15 @@ public class Game_Controller implements Serializable, Initializable{
         }
     }
 
-    void playerDeath(){
+    void playerDeath()  {
+        stat.setDied(stat.getDied() + 1);
+        stat.setPlatform(stat.getPlatform() + score /3);
+        try{
+            stat.writeData();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
         Node node = player.getHero().getGladiator();
         TranslateTransition tt = new TranslateTransition(Duration.millis(50), node);
         tt.setFromY(node.getTranslateY());
@@ -747,6 +784,7 @@ public class Game_Controller implements Serializable, Initializable{
                 throw new NotEnoughCoins("Not enough coins");
             }
             else{
+                stat.setCoinsSpent(stat.getCoinsSpent() + 10000);
                 this.rand = new Random();
                 platform_contact = true;
                 set_boss_generate(false);
@@ -845,7 +883,7 @@ public class Game_Controller implements Serializable, Initializable{
                 time.setCycleCount(Timeline.INDEFINITE);
                 time.play();
             }
-        }catch(NotEnoughCoins err){
+        }catch(NotEnoughCoins | FileNotFoundException err){
             System.out.println(err. getMessage());
             try {
                 System.out.println("Back to screen");
@@ -861,7 +899,7 @@ public class Game_Controller implements Serializable, Initializable{
         }
     }
     @FXML
-    void play(ActionEvent e){
+    void play(ActionEvent e) throws FileNotFoundException {
         this.rand = new Random();
         platform_contact = true;
         set_boss_generate(false);

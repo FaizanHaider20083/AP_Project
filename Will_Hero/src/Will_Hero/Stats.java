@@ -145,6 +145,7 @@ public class Stats {
                 stat_index++;
 
             }
+            br.close();
             setHours(array[0]);
             setMoves(array[1]);
             setTnt(array[2]);
@@ -165,21 +166,23 @@ public class Stats {
     }
 
     void writeData() throws IOException {
+        System.out.println("Write data");
         File file = new File("src/assets/stats.txt");
         FileWriter fileWriter = new FileWriter(file, false);
-        fileWriter.write("Hours Played - " + Integer.toString(getHours()));
-        fileWriter.write("Moves made - " + Integer.toString(getMoves()));
-        fileWriter.write("TNT's burst - " + Integer.toString(getTnt()));
-        fileWriter.write("Orc's killed - " + Integer.toString(getOrcs()));
-        fileWriter.write("Coins collected - " + Integer.toString(getCoins()));
-        fileWriter.write("Coins spent - " + Integer.toString(getCoinsSpent()));
-        fileWriter.write("Platforms jumped - " + Integer.toString(getPlatform()));
-        fileWriter.write("Distance travelled - " + Integer.toString(getDistance()));
-        fileWriter.write("Coin Chests opened - " + Integer.toString(getCoinChests()));
-        fileWriter.write("Weapon Chests opened - " + Integer.toString(getWeaponChests()));
-        fileWriter.write("Times attacked - " + Integer.toString(getAttack()));
-        fileWriter.write("Times died - " + Integer.toString(getDied()));
-        fileWriter.write("Times fallen to death - " + Integer.toString(getFallen()));
+        fileWriter.write("Boss Killed - " + Integer.toString(getHours()) +'\n');
+        fileWriter.write("Moves made - " + Integer.toString(getMoves())+'\n');
+        fileWriter.write("TNT's burst - " + Integer.toString(getTnt())+'\n');
+        fileWriter.write("Orc's killed - " + Integer.toString(getOrcs())+'\n');
+        fileWriter.write("Coins collected - " + Integer.toString(getCoins())+'\n');
+        fileWriter.write("Coins spent - " + Integer.toString(getCoinsSpent())+'\n');
+        fileWriter.write("Platforms jumped - " + Integer.toString(getPlatform())+'\n');
+        fileWriter.write("Distance travelled - " + Integer.toString(getDistance())+'\n');
+        fileWriter.write("Coin Chests opened - " + Integer.toString(getCoinChests())+'\n');
+        fileWriter.write("Weapon Chests opened - " + Integer.toString(getWeaponChests())+'\n');
+        fileWriter.write("Times attacked - " + Integer.toString(getAttack())+'\n');
+        fileWriter.write("Times died - " + Integer.toString(getDied())+'\n');
+        fileWriter.write("Times fallen to death - " + Integer.toString(getFallen())+'\n');
+        fileWriter.close();
 
     }
 }
