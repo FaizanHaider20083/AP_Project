@@ -19,7 +19,7 @@
             <Font name="Georgia" size="64.0" />
          </font>
       </Text>
-      <Button layoutX="152.0" layoutY="239.0" mnemonicParsing="false" onAction="#play" text="Revive">
+      <Button layoutX="152.0" layoutY="239.0" mnemonicParsing="false" onAction="#revive" text="Revive">
          <font>
             <Font name="Arial Black" size="14.0" />
          </font>

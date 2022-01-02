@@ -66,8 +66,6 @@ class CoinChest extends Chest{
         this.coin_count = coins;
         this.height = height;
         this.width = width;
-//        this.anchor = pane;
-//        display(pane);
     }
     public void display(AnchorPane pane){
         setPath();
