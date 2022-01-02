@@ -55,6 +55,7 @@ public class Game_Controller implements Serializable, Initializable{
     private Parent root;
     private ArrayList <Decorations> decorationsList =new ArrayList<>();;
     private Player player;
+
     @FXML
     private AnchorPane MainAnchorPane;
     private boolean isMoving;
@@ -82,8 +83,34 @@ public class Game_Controller implements Serializable, Initializable{
     private Text cointext;
     private ArrayList <WeaponChest> weaponList  = new ArrayList<>();
     private Platform bossPlatform ;
+    private ImageView musicStop;
     ArrayList <WeaponChest> getWeaponList(){return this.weaponList;}
     ArrayList<GameObjects> gameobjectlist = new ArrayList<>();
+    private int music = 0;
+    @FXML
+    private ImageView Music;
+    public int getMusic() {
+        return music;
+    }
+
+    public void setMusic(int music) {
+        this.music = music;
+    }
+
+    @FXML
+    void pauseMusic(ActionEvent e) throws IOException {
+
+        if (music == 0){
+            music = 1;
+            Music.setImage(new Image("assets/musicStop.png"));
+            Game.mplayer.stop();
+        }
+        else {
+           music = 0;
+            Music.setImage(new Image("assets/clipart3569570.png"));
+            Game.mplayer.play();
+        }
+    }
     void death(){
 //        System.out.println(hero.getGladiator().getY());
         if (hero.getGladiator().getY() > 300)
@@ -163,6 +190,7 @@ public class Game_Controller implements Serializable, Initializable{
                 String path = chest.getPath();
                 path = path.substring(0,path.length()-4) + "_open.png";
                 System.out.println(path);
+
                 chest.getNode().setImage(new Image(path));
                 player.setCurr_coins(player.getCurr_coins() + chest.getCoin_count());
             }
@@ -760,15 +788,7 @@ void bossManage(){
     }
     @FXML
     void play(ActionEvent e){
-        Media media = null;
-        try {
-            media = new Media(getClass().getResource("../assets/music.mp3").toURI().toString());
-        } catch (URISyntaxException ex) {
-            ex.printStackTrace();
-        }
-        MediaPlayer player = new MediaPlayer(media);
-        player.setCycleCount(1000);
-        player.play();
+
         this.rand = new Random();
         platform_contact = true;
         set_boss_generate(false);
