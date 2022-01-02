@@ -19,22 +19,23 @@ class TNT extends Obstacles{
     private int range;
     private float width;
     private float height;
-    private AnchorPane anchor;
-    private ImageView TNT;
+    private transient AnchorPane anchor;
+    private transient ImageView TNT;
     private String path = "assets/tnt.png";
     private int platform_info;
-    TNT(float x, float y, int damage, int range, float width, float height, AnchorPane pane, int platform_info) {
+    TNT(float x, float y, int damage, int range, float width, float height, int platform_info) {
         super(x, y);
         this.damage = 10;
         this.range = 5;
         this.height = height;
         this.width = width;
-        this.anchor = pane;
+        //this.anchor = pane;
         this.platform_info = platform_info;
 
-        display(pane);
+        //display(pane);
     }
     public void display(AnchorPane pane){
+        this.anchor = pane;
         Image image = new Image(this.getPath());
         ImageView node = new ImageView(image);
         node.setX(super.getPos_x());

@@ -6,7 +6,7 @@ import javafx.scene.layout.AnchorPane;
 
 
 public class Decorations extends GameObjects{
-    final private AnchorPane pane;
+    private transient AnchorPane pane;
     private float height;
     private float width;
     private String path;
@@ -22,16 +22,16 @@ public class Decorations extends GameObjects{
     void setHeight(float Height){this.height = Height;}
     void setWidth(float width){this.width = width;}
 
-    Decorations(float x, float y,AnchorPane pane,String path, float height, float width){
+    Decorations(float x, float y,String path, float height, float width){
         super(x,y);
-
-        this.pane = pane;
+        //this.pane = pane;
         setHeight(height);
         setWidth(width);
         setPath(path);
-        display(pane);
+        //display(pane);
     }
     public void display(AnchorPane pane){
+        this.pane = pane;
         Image image = new Image(this.getPath());
         ImageView node = new ImageView(image);
         node.setX(super.getPos_x());
@@ -55,33 +55,48 @@ public class Decorations extends GameObjects{
 
 }
 class Birch extends Decorations{
-
     Birch(float x,float y, float height, float width,AnchorPane pane){
 
-        super(x, y, pane, "assets/birch.png",height,width);
+        super(x, y, "assets/birch.png",height,width);
+    }
+    public void display(AnchorPane pane){
+        super.display(pane);
     }
 }
 class clouds extends Decorations{
     clouds(float x,float y, float height, float width,AnchorPane pane){
-        super(x, y, pane, "assets/clouds.png",height,width);
+        super(x, y, "assets/clouds.png",height,width);
+    }
+    public void display(AnchorPane pane){
+        super.display(pane);
     }
 }
 
 class tower extends Decorations{
     tower(float x,float y, float height, float width,AnchorPane pane){
-        super(x, y, pane, "assets/tower.png",height,width);
+        super(x, y, "assets/tower.png",height,width);
     }
+    public void display(AnchorPane pane){
+        super.display(pane);
+    }
+
 }
 
 class bush extends Decorations{
     bush(float x,float y, float height, float width,AnchorPane pane){
-        super(x, y, pane, "assets/bush.png",height,width);
+        super(x, y, "assets/bush.png",height,width);
+    }
+    public void display(AnchorPane pane){
+        super.display(pane);
     }
 }
 
 class tree extends Decorations{
     tree(float x,float y, float height, float width,AnchorPane pane){
-        super(x, y, pane, "assets/tree.png",height,width);
+        super(x, y, "assets/tree.png",height,width);
+    }
+    public void display(AnchorPane pane){
+        super.display(pane);
     }
 }
 

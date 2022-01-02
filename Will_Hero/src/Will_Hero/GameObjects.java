@@ -10,8 +10,8 @@ import java.util.Random;
 public abstract class GameObjects implements Serializable{
     private float pos_x;
     private float pos_y;
-    private ImageView node;
-    ImageView getNode(){return  this.node;}
+    private transient ImageView node;
+    public ImageView getNode(){return  this.node;}
     void setNode(ImageView node){this.node = node;}
     GameObjects(float x, float y){
         this.pos_x = x;
@@ -28,15 +28,14 @@ public abstract class GameObjects implements Serializable{
     abstract void display(AnchorPane pane);
 }
 class Platform extends GameObjects{
-    private Decorations decoration;
+    private transient Decorations decoration;
     private float y_speed;
     private float width;
     private float height;
     private int objects;
     void setObjects(int objects){this.objects = objects;}
     int getObjects(){return this.objects;}
-    private AnchorPane anchor;
-
+    private transient AnchorPane anchor;
     void setDecoration(Decorations decoration){this.decoration = decoration;}
     Decorations getDecoration(){return this.decoration;}
     private String path = "assets/T_Islands_01.png";
@@ -44,18 +43,18 @@ class Platform extends GameObjects{
         Random rand = new Random();
         this.path = "assets/island" + Integer.toString(rand.nextInt(5) + 1) +".png";
     }
-    Platform(float x, float y, float height, float width, AnchorPane pane, float y_speed) {
+    Platform(float x, float y, float height, float width, float y_speed) {
         super(x,y);
         this.height = height;
         this.width = width;
-        this.anchor = pane;
         this.y_speed = y_speed;
         this.objects = 0;
         System.out.println("Created");
-        display(pane);
+        //display(pane);
     }
     public void display(AnchorPane pane){
         setPath();
+        this.anchor = pane;
         System.out.println(this.getPath());
         Image image = new Image(this.getPath());
         ImageView node = getNode();
@@ -89,17 +88,18 @@ class Platform extends GameObjects{
 class Coins extends GameObjects{
     private float width;
     private float height;
-    private AnchorPane anchor;
+    private transient AnchorPane anchor;
 
     private String path = "assets/coin.png";
-    Coins(float x, float y, float height, float width, AnchorPane pane) {
+    Coins(float x, float y, float height, float width) {
         super(x, y);
         this.height = height;
         this.width = width;
-        this.anchor = pane;
-        display(pane);
+//        this.anchor = pane;
+//        display(pane);
     }
     public void display(AnchorPane pane){
+        this.anchor = pane;
         Image image = new Image(this.getPath());
         ImageView node = getNode();
         node = new ImageView(image);

@@ -1,20 +1,26 @@
 package Will_Hero;
 
+
 import javafx.animation.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Translate;
@@ -22,12 +28,25 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import sample.Main;
 
+import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.ResourceBundle;
 
-public class Game_Controller implements Serializable{
+public class Game_Controller implements Serializable, Initializable{
+    private int number_of_games = 1;
+    private Helmet helmet;
+    private EventHandler<MouseEvent> resumeGame;
+    private EventHandler<MouseEvent> saveGame;
+    private EventHandler<MouseEvent> restartGame;
+    private EventHandler<MouseEvent> loadGame;
+    private EventHandler<MouseEvent> backtoMainMenu;
+    private AnchorPane pauseMenuAnchor;
+    private ArrayList<GameObjects> list2;
     private Boss boss;
     private boolean boss_generate;
     private boolean platform_contact;
@@ -76,15 +95,15 @@ public class Game_Controller implements Serializable{
             Parent root = FXMLLoader.load(getClass().getResource("resurrect.fxml"));
             MainAnchorPane = (AnchorPane) root;
             gamePlayScene = new Scene(root);
-            scoreText = new Text(Integer.toString(getScore()));
+            scoreText = new Text("Score: " + Integer.toString(getScore()));
             scoreText.setX(350);
-            scoreText.setY(183);
-            scoreText.setFont(Font.font("Arial Black"));
+            scoreText.setY(193);
+            scoreText.setFont(Font.font("Georgia"));
             MainAnchorPane.getChildren().add(scoreText);
-            cointext = new Text(Integer.toString(player.getCurr_coins()));
+            cointext = new Text("Coins: " + Integer.toString(player.getCurr_coins()));
             cointext.setX(350);
-            cointext.setY(223);
-            cointext.setFont(Font.font("Arial Black"));
+            cointext.setY(213);
+            cointext.setFont(Font.font("Georgia"));
             MainAnchorPane.getChildren().add(cointext);
             myStage.setScene(gamePlayScene);
             myStage.show();
@@ -116,11 +135,15 @@ public class Game_Controller implements Serializable{
             Node temp = plat.getNode();
             hero.collision(temp);
             temp.setTranslateX(temp.getTranslateX() -80);
+//            plat.setPos_x((float) temp.getTranslateX());
+//            plat.setPos_y((float) temp.getTranslateY());
         }
         for (Platform plat : small_platforms){
             Node temp = plat.getNode();
             hero.collision(temp);
             temp.setTranslateX(temp.getTranslateX() -80);
+//            plat.setPos_x((float) temp.getTranslateX());
+//            plat.setPos_y((float) temp.getTranslateY());
         }
         for (Coins coin : coins){
             Node temp = coin.getNode();
@@ -131,6 +154,8 @@ public class Game_Controller implements Serializable{
                 System.out.println("Coin collision");
             }
             temp.setTranslateX(temp.getTranslateX() -80);
+//            coin.setPos_x((float) temp.getTranslateX());
+//            coin.setPos_y((float) temp.getTranslateY());
         }
         for (CoinChest chest : coinChests){
             Node temp = chest.getNode();
@@ -142,6 +167,8 @@ public class Game_Controller implements Serializable{
                 player.setCurr_coins(player.getCurr_coins() + chest.getCoin_count());
             }
             temp.setTranslateX(temp.getTranslateX() -80);
+//            chest.setPos_x((float) temp.getTranslateX());
+//            chest.setPos_y((float) temp.getTranslateY());
         }
         for (WeaponChest chest : weaponList){
             Node temp = chest.getNode();
@@ -157,12 +184,9 @@ public class Game_Controller implements Serializable{
                     player.getHero().getHelmet().getWeaponlist().get(0).setActive_status(true);
                     player.getHero().getHelmet().getWeaponlist().get(1).setActive_status(false);
                     System.out.println(chest.getWeapon().getClass());
-
                     player.getHero().getHelmet().getWeaponlist().get(0).setQuantity(player.getHero().getHelmet().getWeaponlist().get(0).getQuantity() + 1);
-
                     player.getHero().getHelmet().getWeaponlist().get(1).getNode().setOpacity(0);
                     player.getHero().getHelmet().getWeaponlist().get(0).getNode().setOpacity(1);
-
                     player.getHero().getHelmet().getWeaponlist().get(0).setRange(player.getHero().getHelmet().getWeaponlist().get(0).getRange() + 2);
                 }
                 else if (chest.getWeapon().getClass().equals(player.getHero().getHelmet().getWeaponlist().get(1).getClass())){
@@ -180,6 +204,8 @@ public class Game_Controller implements Serializable{
                 }
             }
             temp.setTranslateX(temp.getTranslateX() -80);
+//            chest.setPos_x((float) temp.getTranslateX());
+//            chest.setPos_y((float) temp.getTranslateY());
 
 
         }
@@ -190,15 +216,12 @@ public class Game_Controller implements Serializable{
 
             double distance = temp.getBoundsInParent().getMinX() - hero.getGladiator().getX();
             if (distance <= 80) {
-
                TranslateTransition tt = new TranslateTransition(Duration.millis(50), temp);
                tt.setFromX(temp.getTranslateX());
                tt.setToX(temp.getTranslateX() - distance);
                tt.play();
-
                orcc.setHealth(orcc.getHealth() - 10);
                tt.setOnFinished(e->{
-
                    temp.setTranslateX(temp.getTranslateX() + 60);
                   TranslateTransition tt2 = new TranslateTransition(Duration.millis(200), temp);
                    tt2.setFromX(temp.getTranslateX());
@@ -220,8 +243,11 @@ public class Game_Controller implements Serializable{
 
 
             }
-            else
+            else{
             temp.setTranslateX(temp.getTranslateX() -80);
+//            orcc.setPos_x((float) temp.getTranslateX());
+//            orcc.setPos_y((float) temp.getTranslateY());
+            }
             if (orcc.getHealth() <= 0){
                 orc_death(orcc);
                removal.add( orc.indexOf(orcc));
@@ -255,6 +281,8 @@ public class Game_Controller implements Serializable{
         for (Decorations d: decorationsList){
             Node temp = d.getNode();
             temp.setTranslateX(temp.getTranslateX() -80);
+            d.setPos_x((float) temp.getTranslateX());
+            d.setPos_y((float) temp.getTranslateY());
         }
     }
     void fire(){
@@ -291,7 +319,8 @@ public class Game_Controller implements Serializable{
         for (int i =0;i<10;i++){
             int index = rand.nextInt(platform.size() );
             while (index == 0) index = rand.nextInt(platform.size() );
-            Coins coin = new Coins(platform.get(index).getPos_x() + 40,platform.get(index).getPos_y()-40,20,20,MainAnchorPane);
+            Coins coin = new Coins(platform.get(index).getPos_x() + 40,platform.get(index).getPos_y()-40,20,20);
+            coin.display(MainAnchorPane);
             coins.add(coin);
             platform.get(index).setObjects(platform.get(index).getObjects() + 1);
             gameobjectlist.add(coin);
@@ -304,7 +333,8 @@ public class Game_Controller implements Serializable{
             float distance = 50;
             if (platform.get(index).getWidth() < 50) distance = 20;
             if (platform.get(index).getObjects() > 0) distance = platform.get(index).getWidth()-50;
-            TNT temp = new TNT(platform.get(index).getPos_x() + 20,platform.get(index).getPos_y()-30,10,5,40,30,MainAnchorPane,0);
+            TNT temp = new TNT(platform.get(index).getPos_x() + 20,platform.get(index).getPos_y()-30,10,5,40,30,0);
+            temp.display(MainAnchorPane);
             tnt.add(temp);
             platform.get(index).setObjects(platform.get(index).getObjects() + 1);
             gameobjectlist.add(temp);
@@ -316,7 +346,9 @@ public class Game_Controller implements Serializable{
             while (platform.get(index).getWidth() < 140 || index == 0 || platform.get(index).getObjects()>2) index = rand.nextInt(platform.size());
             float distance = 40;
             if (platform.get(index).getObjects() > 0) distance = platform.get(index).getWidth()-50;
-            Green_Orcs temp  = new Green_Orcs(platform.get(index).getPos_x() + distance, platform.get(index).getPos_y() -40, 15, 0, 9, 40, 40, MainAnchorPane, 1);
+            Green_Orcs temp  = new Green_Orcs(platform.get(index).getPos_x() + distance, platform.get(index).getPos_y() -40, 15, 0, 9, 40, 40, 1);
+            Red_Orcs temp1  = new Red_Orcs(platform.get(index).getPos_x() + distance, platform.get(index).getPos_y() -40, 15, 0, 9, 40, 40, MainAnchorPane, 1);
+            temp.display(MainAnchorPane);
             orc.add(temp);
             platform.get(index).setObjects(platform.get(index).getObjects() + 1);
             gameobjectlist.add(temp);
@@ -357,11 +389,61 @@ public class Game_Controller implements Serializable{
 
             float distance = 40;
             if (platform.get(index).getObjects() > 0) distance = platform.get(index).getWidth()-50;
-            CoinChest chest1 = new CoinChest(platform.get(index).getPos_x() + distance,platform.get(index).getPos_y() -35,rand.nextInt(100),40,60,MainAnchorPane);
+            CoinChest chest1 = new CoinChest(platform.get(index).getPos_x() + distance,platform.get(index).getPos_y() -35,rand.nextInt(100),40,60);
+            chest1.display(MainAnchorPane);
             platform.get(index).setObjects(platform.get(index).getObjects() + 1);
             coinChests.add(chest1);
             platform.get(index).setObjects(platform.get(index).getObjects() + 1);
             gameobjectlist.add(chest1);
+        }
+    }
+    void chestCollision(){
+        for (CoinChest chest: coinChests){
+            Node node = chest.getNode();
+            if (node.getBoundsInParent().intersects(hero.getGladiator().getBoundsInParent())){
+                String path = chest.getPath();
+                path = path.substring(0,path.length()-4) + "_open.png";
+                System.out.println(path);
+                chest.getNode().setImage(new Image(path));
+                player.setCurr_coins(player.getCurr_coins() + chest.getCoin_count());
+            }
+        }
+        for(WeaponChest chest : weaponList){
+            Node temp = chest.getNode();
+            if(hero.collision(temp)){
+                String path = chest.getPath();
+                path = path.substring(0,path.length()-4) + "_open.png";
+                System.out.println(chest.getWeapon());
+                chest.getNode().setImage(new Image(path));
+                chest.getNode().setFitWidth(60);
+                chest.getNode().setFitHeight(40);
+                // lance -> 0 sword -> 1
+                if (chest.getWeapon().getClass().equals(player.getHero().getHelmet().getWeaponlist().get(0).getClass())){
+                    player.getHero().getHelmet().getWeaponlist().get(0).setActive_status(true);
+                    player.getHero().getHelmet().getWeaponlist().get(1).setActive_status(false);
+                    System.out.println(chest.getWeapon().getClass());
+
+                    player.getHero().getHelmet().getWeaponlist().get(0).setQuantity(player.getHero().getHelmet().getWeaponlist().get(0).getQuantity() + 1);
+
+                    player.getHero().getHelmet().getWeaponlist().get(1).getNode().setOpacity(0);
+                    player.getHero().getHelmet().getWeaponlist().get(0).getNode().setOpacity(1);
+
+                    player.getHero().getHelmet().getWeaponlist().get(0).setRange(player.getHero().getHelmet().getWeaponlist().get(0).getRange() + 2);
+                }
+                else if (chest.getWeapon().getClass().equals(player.getHero().getHelmet().getWeaponlist().get(1).getClass())){
+                    player.getHero().getHelmet().getWeaponlist().get(1).setActive_status(true);
+                    player.getHero().getHelmet().getWeaponlist().get(0).setActive_status(false);
+                    System.out.println(chest.getWeapon().getClass());
+                    player.getHero().getHelmet().getWeaponlist().get(1).setQuantity(player.getHero().getHelmet().getWeaponlist().get(1).getQuantity() + 1);
+                    player.getHero().getHelmet().getWeaponlist().get(1).getNode().setOpacity(1);
+                    player.getHero().getHelmet().getWeaponlist().get(0).getNode().setOpacity(0);
+                    player.getHero().getHelmet().getWeaponlist().get(1).setRange(player.getHero().getHelmet().getWeaponlist().get(1).getRange() + 0.1);
+
+                }
+                else {
+                    System.out.println("Elseeeeee " +chest.getWeapon().getClass());
+                }
+            }
         }
     }
     void orcsMotion(){
@@ -424,10 +506,6 @@ public class Game_Controller implements Serializable{
             }
         }
 
-
-
-
-
         if (anycontact == false) platform_contact = false;
 
         if (!anycontact) return index;
@@ -455,9 +533,10 @@ public class Game_Controller implements Serializable{
             int index = rand.nextInt(platform.size());
             Weapon w;
             while (platform.get(index).getWidth() < 140 || index == 0  || platform.get(index).getObjects()>2) index = rand.nextInt(platform.size());
-            if (index %2 ==0) w = new Lance ((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 10, MainAnchorPane,false);
-            else w = new Sword ((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 10, MainAnchorPane,false);
-            WeaponChest chest1 = new WeaponChest(platform.get(index).getPos_x() + 40,platform.get(index).getPos_y() -28,w,MainAnchorPane);
+            if (index %2 ==0) w = new Lance ((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 10,false);
+            else w = new Sword ((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 10, false);
+            WeaponChest chest1 = new WeaponChest(platform.get(index).getPos_x() + 40,platform.get(index).getPos_y() -28,w);
+            chest1.display(MainAnchorPane);
             weaponList.add(chest1);
             platform.get(index).setObjects(platform.get(index).getObjects() + 1);
             gameobjectlist.add(chest1);
@@ -468,17 +547,24 @@ public class Game_Controller implements Serializable{
 
         for(Platform p : platform){
             Birch b  = new Birch(p.getPos_x(),p.getPos_y()-p.getHeight()-30,p.getHeight()+30,40,MainAnchorPane);
+            b.display(MainAnchorPane);
             decorationsList.add(b);
             gameobjectlist.add(b);
         }
     }
-    public void create() {
+    public void create(){
         /*
         to gauge if this works or not do this
         1.comment out the creation/method of everything related to orc1, check out this in the keyevent of play method too
         2.run
         3. The platforms should work perfectly fine with plat2 moving up and down
         */
+        helmet = new Helmet();
+        Player player1 = new Player();
+        hero = new Hero (130,130,0,8,30,40,0, helmet);
+        player1.setHero(hero);
+        hero.display(MainAnchorPane);
+        player = player1;
         scoreText = new Text("0");
         scoreText.setX(50);
         scoreText.setY(50);
@@ -526,11 +612,12 @@ public class Game_Controller implements Serializable{
         gameobjectlist.add(cloud1);gameobjectlist.add(cloud2);
 
 
-        Player player1 = new Player(130,130,0,8,30,40,MainAnchorPane,0);
-        player = player1;
-        Lance lance = new Lance((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 60, MainAnchorPane,true);
-        Sword sword = new Sword((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY(),MainAnchorPane,false);
-
+//        Player player1 = new Player(130,130,0,8,30,40,MainAnchorPane,0);
+//        player = player1;
+        Lance lance = new Lance((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY() + 60, true);
+        Sword sword = new Sword((float)player.getHero().getGladiator().getX() + 35,(float)player.getHero().getGladiator().getY(),false);
+        lance.display(MainAnchorPane);
+        sword.display(MainAnchorPane);
         player.getHero().getHelmet().getWeaponlist().add(lance);
         player.getHero().getHelmet().getWeaponlist().add(sword);
         System.out.println("Create 50% ");
@@ -539,10 +626,13 @@ public class Game_Controller implements Serializable{
         //hero = new Hero(130,110,0,8,40,40,MainAnchorPane,0);
         for (int i =0;i<13;i++){
             if (i!=10) {
-                Platform temp1 = new Platform(893 * i + 100, 220, 50, rand.nextInt(200) + 40, MainAnchorPane, 0);
+                Platform temp1 = new Platform(893 * i + 100, 220, 50, rand.nextInt(200) + 40, 0);
 
-                Platform temp3 = new Platform(893 * i + 500, 220, 50, rand.nextInt(200) + 50, MainAnchorPane, 2);
-                Platform temp4 = new Platform(893 * i + 750, 220, 50, rand.nextInt(150) + 40, MainAnchorPane, 0);
+                Platform temp3 = new Platform(893 * i + 500, 220, 50, rand.nextInt(200) + 50, 2);
+                Platform temp4 = new Platform(893 * i + 750, 220, 50, rand.nextInt(150) + 40, 0);
+                temp1.display(MainAnchorPane);
+                temp3.display(MainAnchorPane);
+                temp4.display(MainAnchorPane);
                 platform.add(temp1);
                 platform.add(temp3);
                 total_platforms.add(temp1);
@@ -556,7 +646,8 @@ public class Game_Controller implements Serializable{
                 gameobjectlist.add(temp4);
             }
         }
-        bossPlatform = new Platform(9100, 290, 50, 600, MainAnchorPane, 0);
+        bossPlatform = new Platform(9100, 290, 50, 600, 0);
+        bossPlatform.display(MainAnchorPane);
         gameobjectlist.add(bossPlatform);
         platform.add(bossPlatform);
         total_platforms.add(bossPlatform);
@@ -580,7 +671,8 @@ public class Game_Controller implements Serializable{
 
     void generateSmallIslands(){
         for (int i = 0;i<9;i++){
-            Platform small = new Platform(893*i +350, 220, 50,rand.nextInt(100)+50,MainAnchorPane,2);
+            Platform small = new Platform(893*i +350, 220, 50,rand.nextInt(100)+50,2);
+            small.display(MainAnchorPane);
             small_platforms.add(small);
             gameobjectlist.add(small);
             total_platforms.add(small);
@@ -602,6 +694,9 @@ public class Game_Controller implements Serializable{
             small_platforms.get(3*i+1).setDecoration(b);
             small_platforms.get(3*i+2).setDecoration(tr);
             small_platforms.get(3*i).setDecoration(t);
+            t.display(MainAnchorPane);
+            b.display(MainAnchorPane);
+            tr.display(MainAnchorPane);
             gameobjectlist.add(t);
             gameobjectlist.add(b);
             gameobjectlist.add(tr);
@@ -638,7 +733,8 @@ public class Game_Controller implements Serializable{
 }
 
 void bossManage(){
-    boss = new Boss(850,110,500,0,5,150,180,MainAnchorPane,1);
+    boss = new Boss(850,110,500,0,5,150,180,1);
+    boss.display(MainAnchorPane);
     set_boss_generate(true);
 }
 
@@ -655,7 +751,24 @@ void bossManage(){
 
     }
     @FXML
+    void resurrect(ActionEvent e){
+        int coins = player.getCurr_coins();
+        int limit = 1000;
+        if(coins>limit){
+            //
+        }
+    }
+    @FXML
     void play(ActionEvent e){
+        Media media = null;
+        try {
+            media = new Media(getClass().getResource("../assets/music.mp3").toURI().toString());
+        } catch (URISyntaxException ex) {
+            ex.printStackTrace();
+        }
+        MediaPlayer player = new MediaPlayer(media);
+        player.setCycleCount(1000);
+        player.play();
         this.rand = new Random();
         platform_contact = true;
         set_boss_generate(false);
@@ -676,7 +789,50 @@ void bossManage(){
         }
         MainAnchorPane = (AnchorPane) root;
         create();
-
+        Button b1 = new Button();
+        b1.setLayoutX(390);
+        b1.setLayoutY(14);
+        b1.setPrefWidth(46);
+        b1.setPrefHeight(48);
+        b1.setOpacity(0);
+        MainAnchorPane.getChildren().add(b1);
+        AnchorPane PauseMenuAnchor = new AnchorPane();
+        try{
+            Parent root1 = FXMLLoader.load(getClass().getResource("pause2.fxml"));
+            //PauseMenuAnchor.getChildren().add(root1);
+            PauseMenuAnchor = (AnchorPane) root1;
+        }catch(IOException err){err.printStackTrace();}
+        PauseMenuAnchor.setVisible(false);
+        PauseMenuAnchor.setLayoutX(250);
+        PauseMenuAnchor.setLayoutY(20);
+        MainAnchorPane.getChildren().add(PauseMenuAnchor);
+        pauseMenuAnchor = PauseMenuAnchor;
+        b1.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                try {
+                    System.out.println("Pause Menu");
+                    if(time!=null){
+                        time.pause();
+                    }
+//                    AnchorPane PauseMenuAnchor = new AnchorPane();
+//                    Parent root1 = FXMLLoader.load(getClass().getResource("pause2.fxml"));
+//                    //PauseMenuAnchor.getChildren().add(root1);
+//                    PauseMenuAnchor = (AnchorPane) root;
+                    pauseMenuAnchor.setVisible(true);
+                    pauseMenuAnchor.getChildren().get(1).setOnMouseClicked(loadGame);
+                    pauseMenuAnchor.getChildren().get(2).setOnMouseClicked(saveGame);
+                    pauseMenuAnchor.getChildren().get(3).setOnMouseClicked(resumeGame);
+                    pauseMenuAnchor.getChildren().get(4).setOnMouseClicked(restartGame);
+                    pauseMenuAnchor.getChildren().get(5).setOnMouseClicked(backtoMainMenu);
+                    //MainAnchorPane.getChildren().add(PauseMenuAnchor);
+                    //pauseMenuAnchor = PauseMenuAnchor;
+                }
+                catch ( Exception f){
+                    f.printStackTrace();
+                }
+            }
+        });
 //        Text t = new Text();
 //        score = Integer.toString(this.score);
 //        t.setText(score);
@@ -708,6 +864,7 @@ void bossManage(){
             hero.jumping(total_platforms);
             coinCollision();
             tntCollision();
+            chestCollision();
             death();
             playerHealthCheck();
             if (boss_generate){
@@ -760,15 +917,59 @@ void bossManage(){
         }
     }
     @FXML
-    void load(ActionEvent e) throws IOException {
+    void load(ActionEvent e) throws IOException, NoSaveFoundException, NoSaveFoundException2{
         try {
-            System.out.println("Loading");
-            Parent root = FXMLLoader.load(getClass().getResource("Scene2.fxml"));
-            myStage = (Stage)((Node)e.getSource()).getScene().getWindow();
-            gamePlayScene = new Scene(root);
-            myStage.setScene(gamePlayScene);
-            myStage.show();
-        }
+            if(number_of_games==0){
+                throw new NoSaveFoundException2("Play a game");
+            }
+            else{
+                System.out.println("Loading");
+                Parent root = FXMLLoader.load(getClass().getResource("load.fxml"));
+                MainAnchorPane = (AnchorPane) root;
+                ChoiceBox choiceBox = new ChoiceBox();
+                choiceBox.setLayoutX(350);
+                choiceBox.setLayoutY(150);
+                MainAnchorPane.getChildren().add(choiceBox);
+                for(int i = 0; i<number_of_games; i++){
+                    String choice = "Game_" + (i+1);
+                    choiceBox.getItems().add(choice);
+                }
+                choiceBox.setOnAction((event) -> {
+                    int selectedIndex = choiceBox.getSelectionModel().getSelectedIndex();
+                    try{
+                        if(selectedIndex >=number_of_games){
+                            throw new NoSaveFoundException("Lol, select a saved game");
+                        }
+                        else{
+                            String tmp = (String) choiceBox.getValue();
+                            String pureStr = getaddress(tmp);
+                            System.out.println(pureStr);
+                            int gameNum = getPlayerGameNumberFromString(pureStr);
+                            String finalFileStr = "C:\\Users\\sired\\IdeaProjects\\Will_Hero_Temp\\src\\SavedGames";
+                            finalFileStr = finalFileStr.concat("\\");
+                            finalFileStr = finalFileStr.concat(tmp);
+                            finalFileStr = finalFileStr + ".txt";
+                            System.out.println(finalFileStr + "hi");
+//                        String finalPlayerStr = "C:\\Users\\Pritish\\IdeaProjects\\ColorSwitch-JavaFx6\\ColorSwitch\\src\\SavedPlayers\\";
+//                        finalPlayerStr = finalPlayerStr.concat(playerName);
+                            loadFile(finalFileStr,gameNum);
+                        }
+                    }catch(NoSaveFoundException error){
+                        System.out.println(error.getMessage());}
+                    catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    } catch (ClassNotFoundException classNotFoundException) {
+                        classNotFoundException.printStackTrace();
+                    }
+                });
+//            MainAnchorPane = (AnchorPane) root;
+//            MainAnchorPane.getChildren().add(Choic);
+                gamePlayScene = new Scene(root);
+                myStage.setScene(gamePlayScene);
+                myStage.show();
+            }
+        }catch(NoSaveFoundException2 error){
+            System.out.println(error.getMessage());}
         catch (Exception f){
             f.printStackTrace();
         }
@@ -787,7 +988,16 @@ void bossManage(){
             f.printStackTrace();
         }
     }
-    private void loadFile(String file,String playerFile,int gameNumber) throws IOException, ClassNotFoundException {
+
+    void playerHealthCheck(){
+        if (hero.getHealth() <= 0){
+            playerDeath();
+        }
+    }
+
+    private void loadFile(String file,int gameNumber) throws IOException, ClassNotFoundException {
+        //String playerFile,
+        System.out.println(file + "loadfile");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Game.fxml"));
             root = (Parent) loader.load();
@@ -796,19 +1006,23 @@ void bossManage(){
             ioException.printStackTrace();
         }
         Scene gameplayscene1 = new Scene(root,793,373);
-        ReGeneratePlayer regenPlayer = new ReGeneratePlayer();
+        //ReGeneratePlayer regenPlayer = new ReGeneratePlayer();
         myStage.setScene(gameplayscene1);
         gamePlayScene=gameplayscene1;
-        player = regenPlayer.getPlayer(playerFile);
-        player.setCurr_coins(player.getCurr_coins());
+//        player = regenPlayer.getPlayer(playerFile);
+//        player.setCurr_coins(player.getCurr_coins());
         //setupScene(gamePlayScene,myStage,currentPlayer);
         loadtheGame(file);
     }
     public void loadtheGame(String filename) throws IOException, ClassNotFoundException {
-        scoreText.setText(Integer.toString(player.getCurr_coins()));
         ReGenerate regenObs = new ReGenerate();
-        System.out.println(filename);
         gameobjectlist = regenObs.regenerateGameObjects(filename, MainAnchorPane);
+        player = regenObs.getPlayer();
+        player.setHero(regenObs.getHero());
+        hero = player.getHero();
+        scoreText.setText(Integer.toString(player.getCurr_coins()));
+        //ReGenerate regenObs = new ReGenerate();
+        System.out.println(filename);
         for(GameObjects g:gameobjectlist){
             if(g instanceof Hero)hero=(Hero)g;
             //g.display(MainAnchorPane);
@@ -816,38 +1030,271 @@ void bossManage(){
         gameobjectlist=new ArrayList<>();
     }
     public void Serialize(String fileName) throws IOException {
-        ObjectOutputStream out = null;
-        try {
-            out = new ObjectOutputStream(new FileOutputStream(fileName));
-            out.writeObject(hero);
-            for (GameObjects gameObject : gameobjectlist) {
-                out.writeObject(gameObject);
-            }
-        }finally {
-            assert out != null;
-            out.close();
+        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(fileName));
+        //System.out.println(player.getLife_count());
+        hero.setPos_x((float) hero.getGladiator().getX());
+        hero.setPos_y((float) hero.getGladiator().getY());
+        out.writeObject(hero);
+        //System.out.println(player.getLife_count());
+        for (GameObjects gameObject : gameobjectlist){
+//            gameObject.setPos_x((float) gameObject.getNode().getX());
+//            gameObject.setPos_y((float) gameObject.getNode().getY());
+            out.writeObject(gameObject);
         }
+        out.close();
     }
 
-    void playerHealthCheck(){
-        if (hero.getHealth() <= 0){
-            playerDeath();
+    //    public void SerializePlayer(String fileName) throws IOException {
+//        ObjectOutputStream out = null;
+//        try {
+//            out = new ObjectOutputStream(new FileOutputStream(fileName));
+//            try {
+//                //out.writeObject(helmet);
+//                out.writeObject(player);
+//            }
+//            catch (NullPointerException e) {
+//                System.out.println("PLAYER NOT INITIALIZED");
+//            }
+//        }finally {
+//            assert out != null;
+//            out.close();
+//        }
+//    }
+    public String getaddress(String s) {
+        int count = 0;
+        for(int i=0;i<s.length();i++) {
+            if(s.charAt(i) == '.')
+                break;
+            count++;
         }
+        String tmp = s.substring(0,count);
+        return tmp;
     }
+    public int getPlayerGameNumberFromString(String s) {
+        return Integer.parseInt(s.split("_")[1]);
+    }
+    public String getFileName(String rootDirectory) {
+        //String currentPlayerName = null;
+        //int gamesPlayed = 0;
+//        try {
+//            currentPlayerName = currentPlayer.getName();
+//            gamesPlayed = currentPlayer.getGamesPlayed();
+//        }catch (NullPointerException e) {
+//            System.out.println("PLAYER NOT INITIALIZED");
+//            return null;
+//        }
+        String fileName = "Game";
+        fileName = fileName.concat("_");
+        fileName = fileName.concat(Integer.toString(number_of_games));
+        String finalFile = rootDirectory;
+        finalFile = finalFile.concat("\\");
+        finalFile = finalFile.concat(fileName);
+        finalFile = finalFile.concat(".txt");
+        return finalFile;
+    }
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        list2=new ArrayList<>();
+        resumeGame = new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                System.out.println("resume");
+                pauseMenuAnchor.setVisible(false);
+                if (time != null) time.play();
+            }
+        };
+        saveGame=new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                System.out.println("save butt");
+                try {
+                    //String playerFile = getPlayerFileName("C:\\Users\\Pritish\\IdeaProjects\\ColorSwitch-JavaFx6\\ColorSwitch\\src\\SavedPlayers"); C:\Users\sired\IdeaProjects\Will_Hero_Temp\src\SavedGames
+                    String fileName = getFileName("C:\\Users\\sired\\IdeaProjects\\Will_Hero_Temp\\src\\SavedGames");
+//            SerializePlayer(playerFile);
+                    System.out.println(fileName);
+                    Serialize(fileName);
+                } catch (IOException error) {
+                    error.printStackTrace();
+                }
+            }
+        };
+        loadGame = new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                System.out.println("load butt");
+                //System.exit(1);
+                try {
+                    if(number_of_games==0){
+                        throw new NoSaveFoundException2("Play a game");
+                    }
+                    else{
+                        System.out.println("Loading");
+                        Parent root = FXMLLoader.load(getClass().getResource("load.fxml"));
+                        MainAnchorPane = (AnchorPane) root;
+                        ChoiceBox choiceBox = new ChoiceBox();
+                        choiceBox.setLayoutX(350);
+                        choiceBox.setLayoutY(150);
+                        MainAnchorPane.getChildren().add(choiceBox);
+                        for(int i = 0; i<number_of_games; i++){
+                            String choice = "Game_" + (i+1);
+                            choiceBox.getItems().add(choice);
+                        }
+                        choiceBox.setOnAction((event) -> {
+                            int selectedIndex = choiceBox.getSelectionModel().getSelectedIndex();
+                            try{
+                                if(selectedIndex >=number_of_games){
+                                    throw new NoSaveFoundException("Lol, select a saved game");
+                                }
+                                else{
+                                    String tmp = (String) choiceBox.getValue();
+                                    String pureStr = getaddress(tmp);
+                                    System.out.println(pureStr);
+                                    int gameNum = getPlayerGameNumberFromString(pureStr);
+                                    String finalFileStr = "C:\\Users\\sired\\IdeaProjects\\Will_Hero_Temp\\src\\SavedGames";
+                                    finalFileStr = finalFileStr.concat("\\");
+                                    finalFileStr = finalFileStr.concat(tmp);
+                                    finalFileStr = finalFileStr + ".txt";
+                                    System.out.println(finalFileStr + "hi");
+//                        String finalPlayerStr = "C:\\Users\\Pritish\\IdeaProjects\\ColorSwitch-JavaFx6\\ColorSwitch\\src\\SavedPlayers\\";
+//                        finalPlayerStr = finalPlayerStr.concat(playerName);
+                                    loadFile(finalFileStr,gameNum);
+                                }
+                            }catch(NoSaveFoundException error){
+                                System.out.println(error.getMessage());}
+                            catch (IOException ioException) {
+                                ioException.printStackTrace();
+                            } catch (ClassNotFoundException classNotFoundException) {
+                                classNotFoundException.printStackTrace();
+                            }
+                        });
+//            MainAnchorPane = (AnchorPane) root;
+//            MainAnchorPane.getChildren().add(Choic);
+                        gamePlayScene = new Scene(root);
+                        myStage.setScene(gamePlayScene);
+                        myStage.show();
+                        if(time!=null){ time.play();}
+                    }
+                }catch(NoSaveFoundException2 error){
+                    System.out.println(error.getMessage());}
+                catch (Exception f){
+                    f.printStackTrace();
+                }
+            }
+        };
+        restartGame = new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                System.out.println("restart butt");
+//                String fileName = getPlayerFileNameWithRestartValue("C:\\Users\\Pritish\\IdeaProjects\\ColorSwitch-JavaFx6\\ColorSwitch\\src\\LeaderBoard");
+//                try {
+//                    SerializePlayer(fileName);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//                GamePlayController temp = null;
+//                Parent p_root = null;
+//                try {
+//                    FXMLLoader loader = new FXMLLoader(getClass().getResource("GamePlay.fxml"));
+//                    p_root = (Parent) loader.load();
+//                    temp = loader.getController();
+//                    new ThemeDecorator((AnchorPane) p_root,chosenTheme);
+//                    GameMain.currentSceneController=temp;
+//                    temp.gamePlayAnchorPane=(AnchorPane) p_root;
+//                    temp.letsgetitstarted();
+////                ctrl.init(table.getSelectionModel().getSelectedItem());
+//
+////                p_root = FXMLLoader.load(getClass().getResource("GamePlay.fxml"));
+//                } catch (IOException ioException) {
+//                    ioException.printStackTrace();
+//                }
+//                Scene gameplayscene = new Scene(p_root, 525, 810);
+//                BallSingleton.getInstance();
+//                myStage.setScene(gameplayscene);
+//
+//                temp.gamePlayAnchorPane = (AnchorPane) p_root;
+//                currentPlayer.setRestartCount(currentPlayer.getRestartCount()+1);
+////                currentPlayer.se
+//                temp.setupScene(gameplayscene, myStage,currentPlayer,chosenTheme);
+//                if(gravity!=null)gravity.play();
+            }
+        };
+        backtoMainMenu = new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                System.out.println("main menu butt");
+                try {
+                    System.out.println("Back to screen");
+                    Parent root = FXMLLoader.load(getClass().getResource("mainmenu.fxml"));
+                    myStage = (Stage)((Node)mouseEvent.getSource()).getScene().getWindow();
+                    gamePlayScene = new Scene(root);
+                    myStage.setScene(gamePlayScene);
+                    myStage.show();
+                }
+                catch (Exception f){
+                    f.printStackTrace();
+                }
+//                String fileName = getPlayerFileNameWithRestartValue("C:\\Users\\Pritish\\IdeaProjects\\ColorSwitch-JavaFx6\\ColorSwitch\\src\\LeaderBoard");
+//                try {
+//                    SerializePlayer(fileName);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//                gamePlayAnchorPane.getChildren().remove(panel);
+//                gamePlayAnchorPane.getChildren().remove(Score);
+//                FXMLLoader loader1 = new FXMLLoader(getClass().getResource("BlackPane.fxml"));
+//                try {
+//                    panel = (AnchorPane) loader1.load();
+//                    gamePlayAnchorPane.getChildren().add(panel);
+//                } catch (IOException error) {
+//                    error.printStackTrace();
+//                }
+//                Timeline tim2 = new Timeline();
+//                KeyFrame changeSceneSize = new KeyFrame(Duration.millis(20), e -> {
+//                    if (myStage.getWidth() < 1280) myStage.setWidth(myStage.getWidth() + 10);
+//                    if (myStage.getHeight() > 760) myStage.setHeight(myStage.getHeight() - 2);
+//                });
+//                tim2.getKeyFrames().add(changeSceneSize);
+//                tim2.setCycleCount(100);
+//
+//                Timeline swtichscenez = new Timeline(new KeyFrame(Duration.millis(1), e -> {
+//                    Parent root = null;
+//                    GameMain ctrl = null;
+//                    try {
+//                        FXMLLoader loader = new FXMLLoader(getClass().getResource("ColorSwitch.fxml"));
+//                        root = (Parent) loader.load();
+//                        ctrl = loader.getController();
+//                        Scene mainmenuscene = new Scene(root, 1280, 720);
+//                        myStage.setScene(mainmenuscene);
+//
+////
+////                         ctrl.init(table.getSelectionModel().getSelectedItem());
+//
+////                p_root = FXMLLoader.load(getClass().getResource("GamePlay.fxml"));
+//                    } catch (IOException ioException) {
+//                        ioException.printStackTrace();
+//                    }
+//                    // Scene gameplayscene=new Scene(p_root,525,810);
+//                    //GamePlayController.setupScense(gameplayscene);
+//
+//                    // myStage.setScene(gameplayscene);
+//                    // getCurrentScene=gameplayscene;
+//                    //((GameMain)ctrl).setupScene(gamePlayScene,myStage);
 
-    public void SerializePlayer(String fileName) throws IOException {
-        ObjectOutputStream out = null;
-        try {
-            out = new ObjectOutputStream(new FileOutputStream(fileName));
-            try {
-                out.writeObject(player);
+
+                //}));
+                //new SequentialTransition(CommonAnimation.delay(1), tim2, swtichscenez).play();
+
             }
-            catch (NullPointerException e) {
-                System.out.println("PLAYER NOT INITIALIZED");
-            }
-        }finally {
-            assert out != null;
-            out.close();
-        }
+        };
+    }
+}
+
+class NoSaveFoundException extends Exception {
+    public NoSaveFoundException(String message) {
+        super(message);
+    }
+}
+class NoSaveFoundException2 extends Exception {
+    public NoSaveFoundException2(String message) {
+        super(message);
     }
 }

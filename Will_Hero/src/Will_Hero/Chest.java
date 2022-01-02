@@ -15,14 +15,14 @@ class WeaponChest extends Chest{
     private Weapon weapon;
     private float width;
     private float height;
-    private AnchorPane anchor;
+    private transient AnchorPane anchor;
     private String path = "assets/weaponchest.png";
 
-    WeaponChest(float x, float y, Weapon weapon,AnchorPane pane) {
+    WeaponChest(float x, float y, Weapon weapon) {
         super(x, y);
         this.weapon = weapon;
-        this.anchor = pane;
-        display(anchor);
+//        this.anchor = pane;
+//        display(anchor);
     }
     private void setPath(){
         Random rand = new Random();
@@ -30,6 +30,7 @@ class WeaponChest extends Chest{
     }
     public void display(AnchorPane pane){
         setPath();
+        this.anchor = pane;
         System.out.println(this.getPath());
         Image image = new Image(this.getPath());
         ImageView node = new ImageView(image);
@@ -52,8 +53,7 @@ class WeaponChest extends Chest{
 class CoinChest extends Chest{
     private float width;
     private float height;
-    private AnchorPane anchor;
-
+    private transient AnchorPane anchor;
     private String path = "assets/coinchest.png";
     private int coin_count;
     int getCoin_count(){return this.coin_count;}
@@ -61,16 +61,17 @@ class CoinChest extends Chest{
         Random rand = new Random();
         this.path = "assets/coinchest" + Integer.toString(rand.nextInt(4) + 1) +".png";
     }
-    CoinChest(float x, float y, int coins, float height, float width, AnchorPane pane) {
+    CoinChest(float x, float y, int coins, float height, float width) {
         super(x, y);
         this.coin_count = coins;
         this.height = height;
         this.width = width;
-        this.anchor = pane;
-        display(pane);
+//        this.anchor = pane;
+//        display(pane);
     }
     public void display(AnchorPane pane){
         setPath();
+        this.anchor = pane;
         System.out.println(this.getPath());
         Image image = new Image(this.getPath());
         ImageView node = getNode();

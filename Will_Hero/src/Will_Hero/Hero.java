@@ -13,10 +13,15 @@ import javafx.scene.paint.Stop;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
+import java.io.Serializable;
 import java.util.*;
-class Helmet{
+class Helmet implements Serializable {
     private ArrayList<Weapon> weaponlist;
     public ArrayList<Weapon> getWeaponlist() { return weaponlist; }
+    public void setWeaponlist(ArrayList<Weapon> weaponlist) {
+        this.weaponlist = weaponlist;
+    }
+
     Helmet(){
         this.weaponlist = new ArrayList<>();
     }
@@ -26,7 +31,7 @@ abstract class Weapon extends GameObjects{
     private int level;
     private boolean active_status;
     private double range;
-    private AnchorPane anchor;
+    private transient AnchorPane anchor;
     private String path ;
     private int height ;
     private  int width;
@@ -59,11 +64,11 @@ abstract class Weapon extends GameObjects{
 
 }
 class Lance extends Weapon{
-    Lance(float x, float y,AnchorPane pane,boolean activeStatus) {
+    Lance(float x, float y,boolean activeStatus) {
         super(x, y,5 ,1 , true,10 );
         this.setActive_status(activeStatus);
-       setAnchor(pane);
-       display(pane);
+//        setAnchor(pane);
+//        display(pane);
         this.setPath("assets/lance.png");
         setQuantity(0);
     }
@@ -125,7 +130,7 @@ class Lance extends Weapon{
 
     }
     public void display(AnchorPane pane){
-
+        this.setAnchor(pane);
         this.setPath("assets/lance.png");
         Image image = new Image(this.getPath());
         ImageView node = getNode();
@@ -146,16 +151,16 @@ class Lance extends Weapon{
     }
 }
 class Sword extends Weapon{
-    Sword(float x, float y,AnchorPane pane,boolean activeStatus) {
+    Sword(float x, float y,boolean activeStatus) {
         super(x, y,5 ,1 , true,1 );
         this.setActive_status(activeStatus);
-        this.setAnchor(pane);
-        this.display(pane);
+//        this.setAnchor(pane);
+//        this.display(pane);
         this.setPath("assets/sword2.png");
         setQuantity(1);
     }
     public void display(AnchorPane pane){
-
+            this.setAnchor(pane);
             this.setPath("assets/sword2.png");
             Image image = new Image(this.getPath());
             ImageView node = new ImageView(image);
@@ -248,31 +253,33 @@ public class Hero extends GameObjects{
     private int health;
     private float width;
     private float height;
-    private AnchorPane anchor;
-    private ImageView Gladiator;
+    private transient AnchorPane anchor;
+    private transient ImageView Gladiator;
     private String path = "assets/gladiator.png";
     private int platform_info;
     void setHealth(int health){this.health = health;}
-    Hero(float x, float y, float x_speed, float y_speed, float width, float height, AnchorPane pane, int platform_info) {
+    Hero(float x, float y, float x_speed, float y_speed, float width, float height, int platform_info, Helmet helmet) {
         super(x, y);
         this.x_speed = x_speed;
         this.y_speed= y_speed;
         this.health = 200;
-        this.helmet = new Helmet();
+        this.helmet = helmet;
         this.boss_status = false;
         this.height = height;
         this.width = width;
-        this.anchor = pane;
+        //this.anchor = pane;
         this.platform_info = platform_info;
-        display(pane);
+        //display(pane);
     }
     public void display(AnchorPane pane){
+        this.anchor = pane;
         Image image = new Image(getPath());
         this.Gladiator = new ImageView(image);
         Gladiator.setX(super.getPos_x());
         Gladiator.setY(super.getPos_y());
         Gladiator.setFitHeight(this.getHeight());
         Gladiator.setFitWidth((this.getWidth()));
+        this.setNode(this.getGladiator());
         this.getAnchor().getChildren().add(Gladiator);
     }
 
@@ -340,7 +347,8 @@ public class Hero extends GameObjects{
 //            this.getNode().setY(this.getNode().getY() + 8);
 //        }
 //        works but just shows result not the transition animation
-
+        this.getHelmet().getWeaponlist().get(0).getNode().setOpacity(0);
+        this.getHelmet().getWeaponlist().get(1).getNode().setOpacity(0);
         TranslateTransition tt = new TranslateTransition(Duration.millis(2000),this.getGladiator());
         tt.setFromY(-20);
         System.out.println(this.getGladiator().getY());

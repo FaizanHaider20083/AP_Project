@@ -33,17 +33,17 @@ public abstract class Orcs extends GameObjects{
 class Green_Orcs extends Orcs{
     private float width;
     private float height;
-    private AnchorPane anchor;
+    private transient AnchorPane anchor;
 
     private String path = "assets/greenorc.png";
     private int platform_info;
-    Green_Orcs(float x, float y, int health, int x_speed, int y_speed, float height, float width, AnchorPane pane, int platform_info) {
+    Green_Orcs(float x, float y, int health, int x_speed, int y_speed, float height, float width, int platform_info) {
         super(x, y, health, x_speed, y_speed);
         this.width = width;
         this.height = height;
-        this.anchor = pane;
+        //this.anchor = pane;
         this.platform_info = platform_info;
-        display(pane);
+        //display(pane);
 
     }
     boolean platfrom_collision(Node obj){
@@ -89,6 +89,7 @@ class Green_Orcs extends Orcs{
     public String getPath() { return path; }
     public int getPlatform_info() { return platform_info; }
     public void display(AnchorPane pane){
+        this.anchor = pane;
         setPath();
         System.out.println(getPath());
         Image image = new Image(getPath());
@@ -125,7 +126,7 @@ class Green_Orcs extends Orcs{
 class Red_Orcs extends Orcs{
     private float width;
     private float height;
-    private AnchorPane anchor;
+    private transient AnchorPane anchor;
     private String path = "assets/redorc.png";
     private int platform_info;
     Red_Orcs(float x, float y, int health, int x_speed, int y_speed, float height, float width, AnchorPane pane, int platform_info) {
@@ -134,7 +135,7 @@ class Red_Orcs extends Orcs{
         this.height = height;
         this.anchor = pane;
         this.platform_info = platform_info;
-        display(pane);
+        //display(pane);
 
     }
     public float getWidth() { return width; }
@@ -169,10 +170,10 @@ class Boss extends Orcs{
     private boolean death_status;
     private int width;
     private int height;
-    private AnchorPane anchor;
-    private ImageView node;
+    private transient AnchorPane anchor;
+    private transient ImageView node;
     private String path = "assets/boss.png";
-    private ImageView weapon;
+    private transient ImageView weapon;
     public ImageView getWeapon(){return weapon;}
     private void setWeapon(ImageView weapon){this.weapon = weapon;}
     private int platform_info;
@@ -187,20 +188,21 @@ class Boss extends Orcs{
     public void setSemaphore(int semaphore){this.semaphore = semaphore;}
     public void setDeath_status(boolean death_status){this.death_status = death_status;}
     public boolean getDeath_status(){return this.death_status;}
-    public ImageView spear ;
+    public transient ImageView spear ;
 
     void setNode(ImageView node){this.node = node;}
-    Boss(float x, float y, int health, int x_speed, int y_speed,int width,int height,AnchorPane pane,int platform_info) {
+    Boss(float x, float y, int health, int x_speed, int y_speed,int width,int height,int platform_info) {
         super(x, y, health, x_speed, y_speed);
         this.death_status = false;
         this.width = width;
         this.height = height;
-        this.anchor = pane;
+        //this.anchor = pane;
         this.platform_info = platform_info;
 
-        display(pane);
+        //display(pane);
     }
     public void display(AnchorPane pane){
+        this.anchor = pane;
         Image image = new Image(getPath());
         this.node = new ImageView(image);
         node.setX(super.getPos_x());
